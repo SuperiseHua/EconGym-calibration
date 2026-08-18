@@ -197,6 +197,11 @@ class EconomicSociety:
     
         # === Phase 3: Update Environment State ===
         self.update_metrics()
+
+        if self.market.type == "perfect":
+            # Current planned demand determines the next year's competitive-market price.
+            planned_demand = self.households.planned_consumption_demand + self.main_gov.gov_spending
+            self.market.update_price(planned_demand, self.market.Yt_j)
         self.step_cnt += 1
         self.done = self.is_terminal()
     
@@ -204,7 +209,8 @@ class EconomicSociety:
         next_obs = EconObservations(self).get_obs()
 
         # === Phase 5: Final Updates ===
-        self.last_price_index = copy.copy(self.price_index)
+        self.last_prices = self.consumer_prices.copy()
+        self.last_consumption = self.consumption_quantities.copy()
 
         return (
             next_obs,
@@ -218,9 +224,13 @@ class EconomicSociety:
         self.wealth_gini = self.gini_coef(self.households.post_asset)
         self.income_gini = self.gini_coef(self.households.post_income)
 
-        # Compute Price Index
-        self.inflation_rate, self.price_index = self.market.compute_inflation_rate(self.market.price,
-                                                                                   self.last_price_index)
+        # Annual PCE-style chain Fisher index based only on consumer transactions.
+        self.consumer_prices = self.market.price * (1 + self.consumption_tax_rate)
+        self.consumption_quantities = self.households.final_consumption.sum(axis=0)
+        self.inflation_rate, self.price_index = self.market.compute_inflation_rate(
+            self.consumer_prices, self.consumption_quantities,
+            self.last_prices, self.last_consumption, self.price_index,
+        )
         
         market_supply = self.market.Yt_j
         market_demand = self.households.final_consumption.sum(axis=0)[:, np.newaxis] + self.main_gov.gov_spending
@@ -254,12 +264,17 @@ class EconomicSociety:
         
         self.households.reset()
         self.bank.reset(households_at=self.households.at)
+        if "central_bank" in self.government:
+            central_bank = self.government["central_bank"]
+            self.bank.base_interest_rate = central_bank.base_interest_rate
+            self.bank.reserve_ratio = central_bank.reserve_ratio
 
         self.market.reset(households_n=self.households.households_n, GDP=gov_agent.GDP,
                           households_at=self.households.at, real_debt_rate=gov_agent.real_debt_rate)
 
-        # self.last_price_index = 1
-        self.last_price_index = self.market.calculate_price_index(self.market.price)
+        self.price_index = 100.0
+        self.last_prices = self.market.price * (1 + self.consumption_tax_rate)
+        self.last_consumption = None
         self.ini_income_gini = self.gini_coef(self.households.income)
         self.ini_wealth_gini = self.gini_coef(self.households.at)
         self.done = False
@@ -338,5 +353,3 @@ class EconomicSociety:
             pygame.display.quit()
             pygame.quit()
             self.isopen = False
-
-

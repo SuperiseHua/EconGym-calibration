@@ -224,6 +224,8 @@ Trainer:                                # Store parameters related to policy tra
   wandb: False                          # Whether to log with W&B/Swanlab
   test: False                           # Test mode flag
   bc_test: True                         # in agents/behavior_cloning/bc_agent.py. if False, get actions from real data, and trained via BC; if True, get action from trained BC policy.
-  llm_name: "gpt-4o-mini"               # Name of the LLM to be used for decision-making or interaction, {"deepseek-chat", "gpt-4o", ...}
-  api_key: ""                           # API key for the LLM service. Can be set here or via environment variable; either option will take effect.
-
+  llm_provider: "openai"                 # API provider: openai, deepseek, or openrouter
+  llm_name: "gpt-4o-mini"               # Provider-specific model name
+  api_key: ""                            # Prefer the provider's environment variable instead
+  openrouter_site_url: ""                # Optional HTTP-Referer header
+  openrouter_app_name: "EconGym"         # Optional X-Title header

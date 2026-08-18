@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Fast monetary-policy decision",
+  "description": "The central bank's two instrument adjustments for the current decision period.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["policy_rate_action", "reserve_ratio_action"],
+  "properties": {
+    "policy_rate_action": {
+      "description": "Adjustment to the policy rate relative to its current value.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["direction", "change_bps"],
+      "properties": {
+        "direction": {
+          "description": "Direction of the policy-rate adjustment.",
+          "type": "string",
+          "enum": ["increase", "decrease", "hold"]
+        },
+        "change_bps": {
+          "description": "Absolute adjustment in basis points. Hold requires zero.",
+          "type": "integer",
+          "enum": [0, 25, 50, 75]
+        }
+      }
+    },
+    "reserve_ratio_action": {
+      "description": "Adjustment to the reserve requirement relative to its current value.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["direction", "change_bps"],
+      "properties": {
+        "direction": {
+          "description": "Direction of the reserve-ratio adjustment.",
+          "type": "string",
+          "enum": ["increase", "decrease", "hold"]
+        },
+        "change_bps": {
+          "description": "Absolute adjustment in basis points. Hold requires zero.",
+          "type": "integer",
+          "enum": [0, 25, 50, 75]
+        }
+      }
+    }
+  }
+}

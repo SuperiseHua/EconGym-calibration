@@ -21,42 +21,33 @@ class Market(BaseEntity):
             low=-0.2, high=0.2, shape=(self.firm_n, self.action_dim), dtype=np.float32
         )
     
-    def calculate_price_index(self, prices, include_wage=True, wage_weight=1.0):
-        """
-        Calculate CES price index from product prices and optionally include wage rate as labor price.
+    @staticmethod
+    def compute_inflation_rate(prices, quantities, old_prices, old_quantities=None, old_index=100.0):
+        """Annual PCE-style chain Fisher inflation from consumer prices and consumption."""
+        p, q = np.asarray(prices).ravel(), np.asarray(quantities).ravel()
+        p_old = np.asarray(old_prices).ravel()
+        q_old = q if old_quantities is None else np.asarray(old_quantities).ravel()
+        if not (p.size == q.size == p_old.size == q_old.size):
+            raise ValueError("Prices and quantities must have the same length.")
+        if np.any(p <= 0) or np.any(p_old <= 0) or np.any(q < 0) or np.any(q_old < 0):
+            raise ValueError("Prices must be positive and quantities non-negative.")
+        if q.sum() == 0 or q_old.sum() == 0:
+            raise ValueError("Fisher inflation requires positive consumption.")
 
-        Parameters:
-        - prices: list or array of product prices
-        - include_wage: bool, whether to include wage in the index
-        - wage_weight: float, relative weight of wage price term
+        laspeyres = np.dot(p, q_old) / np.dot(p_old, q_old)
+        paasche = np.dot(p, q) / np.dot(p_old, q)
+        fisher = np.sqrt(laspeyres * paasche)
+        return float(fisher - 1), float(old_index * fisher)
 
-        Returns:
-        - price_index: float, aggregated CES price index
-        """
-        if self.epsilon == 1:
-            raise ValueError("Epsilon cannot be 1 as it would lead to division by zero.")
-        
-        # Convert prices to flat array
-        prices = np.array(prices).flatten()
-        weighted_prices = [p ** (1 - self.epsilon) for p in prices]
-        
-        # Add wage component if enabled
-        if include_wage:
-            wage_rates = np.array(self.WageRate).flatten()
-            wage_terms = [(w ** (1 - self.epsilon)) * wage_weight for w in wage_rates]
-            weighted_prices.extend(wage_terms)
-        
-        sum_weighted_prices = sum(weighted_prices)
-        price_index = sum_weighted_prices ** (1 / (1 - self.epsilon))
-        return price_index
-    
-    def compute_inflation_rate(self, prices, old_price_level):
-        current_price_level = self.calculate_price_index(prices)
-        if old_price_level == 0:
-            raise ValueError("Invalid price level: 0.")
-        else:
-            inflation_rate = (current_price_level / old_price_level).item() - 1
-            return inflation_rate, current_price_level
+    def update_price(self, planned_demand, supply, adjustment_speed=1.0):
+        """Set next year's price by P[t+1] = P[t] * (D[t] / S[t]) ** lambda."""
+        # lambda is the price-adjustment speed; lambda=1 means full adjustment.
+        demand = np.asarray(planned_demand, dtype=float).reshape(self.price.shape)
+        supply = np.asarray(supply, dtype=float).reshape(self.price.shape)
+        if np.any(demand < 0) or np.any(supply <= 0):
+            raise ValueError("Price adjustment requires non-negative demand and positive supply.")
+        # The floor is only a numerical safeguard when planned demand is zero.
+        self.price = self.price * np.power(np.maximum(demand, 1e-8) / supply, adjustment_speed)
     
     def update_firm_productivity(self):
         """Update the production quality (technology shock)."""

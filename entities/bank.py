@@ -29,8 +29,11 @@ class Bank(BaseEntity):
 
         self.deposit_rate = self.entity_args['params'].deposit_rate
         self.lending_rate = self.entity_args['params'].lending_rate
+        self.reserve_ratio = self.entity_args['params'].reserve_ratio
+        self.base_interest_rate = self.entity_args['params'].base_interest_rate
         self.last_deposit_rate = copy.copy(self.deposit_rate)
         self.last_lending_rate = copy.copy(self.lending_rate)
+        self.capital_loan = 0.0
         # self.last_lending_rate_j = copy.copy(self.lending_rate)
 
     def get_action(self, actions, central_bank_exist=False):
@@ -60,12 +63,13 @@ class Bank(BaseEntity):
                 self.base_interest_rate = self.gov_agent.base_interest_rate
                 
         if society.step_cnt == 0:
-            self.current_account -= self.gov_agent.Bt + np.sum(society.market.Kt)
+            self.capital_loan = np.sum(society.market.price * society.market.Kt)
+            self.current_account -= self.gov_agent.Bt + self.capital_loan
 
         # Settle the previous period's borrowing interest and deposit rate
         # Government debt rates are usually based on the central bank's benchmark rate.
         previous_settlement = - (1 + self.deposit_rate) * np.sum(society.households.at) \
-                              + np.sum((self.lending_rate + 1 - self.depreciation_rate) * society.market.Kt) \
+                              + (self.lending_rate + 1 - self.depreciation_rate) * self.capital_loan \
                               + (1 + self.lending_rate) * self.gov_agent.Bt
 
         current_deposit = np.sum(society.households.at_next)  # Deposits at this step in the bank
@@ -74,25 +78,29 @@ class Bank(BaseEntity):
 
         society.market.Kt_next = self.compute_next_kt(society, total_deposit)
 
-        current_loan = np.sum(society.market.Kt_next) + self.gov_agent.Bt_next  # Current loans issued
+        capital_loan = np.sum(society.market.price * society.market.Kt_next)
+        current_loan = capital_loan + self.gov_agent.Bt_next  # Nominal loans issued
 
-        self.profit = np.sum(self.lending_rate * society.market.Kt_next) + self.lending_rate * self.gov_agent.Bt_next \
+        self.profit = self.lending_rate * capital_loan + self.lending_rate * self.gov_agent.Bt_next \
                       - self.deposit_rate * current_deposit
 
         self.current_account += previous_settlement + current_deposit - current_loan  # Current account balance
+        self.capital_loan = capital_loan
 
         self.last_deposit_rate = copy.copy(self.deposit_rate)
         self.last_lending_rate = copy.copy(self.lending_rate)
 
     def compute_next_kt(self, society, total_deposit):
         consumption_sum = society.households.final_consumption.sum(axis=0)[:, np.newaxis]
-        investment = society.market.price * (society.market.Yt_j - self.gov_agent.gov_spending - consumption_sum)
-        Kt_next = investment + (1 - self.depreciation_rate) * society.market.Kt
+        real_investment = np.maximum(
+            society.market.Yt_j - self.gov_agent.gov_spending - consumption_sum, 0.0
+        )
+        Kt_next = real_investment + (1 - self.depreciation_rate) * society.market.Kt
 
-        upper_bound_loan = total_deposit * (1 - self.reserve_ratio)
-        if np.sum(Kt_next) + self.gov_agent.Bt_next > upper_bound_loan:
-            kt_prob = Kt_next / (np.sum(Kt_next) + 1e-8)
-            Kt_next = (upper_bound_loan - self.gov_agent.Bt_next) * kt_prob
+        nominal_credit = max(total_deposit * (1 - self.reserve_ratio) - self.gov_agent.Bt_next, 0.0)
+        desired_credit = np.sum(society.market.price * Kt_next)
+        if desired_credit > nominal_credit:
+            Kt_next *= nominal_credit / (desired_credit + 1e-8)
         return Kt_next
 
     def get_reward(self):

@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Slow monetary-policy rule",
+  "description": "A medium-term, state-dependent monetary-policy framework generated once per episode.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["policy_name", "diagnosis", "objective", "instrument_strategy", "reaction_rule", "risk_management", "review_interval"],
+  "properties": {
+    "policy_name": {"type": "string"},
+    "diagnosis": {"type": "string"},
+    "objective": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["inflation_target_pct", "horizon", "growth_safeguard"],
+      "properties": {
+        "inflation_target_pct": {"type": "number", "enum": [2.0]},
+        "horizon": {"type": "string", "enum": ["medium_term"]},
+        "growth_safeguard": {"type": "string", "enum": ["avoid_prolonged_contraction"]}
+      }
+    },
+    "instrument_strategy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["primary_instrument", "reserve_ratio_role"],
+      "properties": {
+        "primary_instrument": {"type": "string", "enum": ["policy_rate"]},
+        "reserve_ratio_role": {"type": "string", "enum": ["rarely", "complementary", "active"]}
+      }
+    },
+    "reaction_rule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["inflation_tolerance_pp", "weak_growth_pct", "high_inflation_positive_growth", "high_inflation_weak_growth", "low_inflation_positive_growth", "low_inflation_weak_growth", "near_target"],
+      "properties": {
+        "inflation_tolerance_pp": {"type": "number", "enum": [0.5, 1.0, 2.0]},
+        "weak_growth_pct": {"type": "number", "enum": [0.0, 1.0, 2.0]},
+        "high_inflation_positive_growth": {"type": "string", "enum": ["tighten", "hold", "ease"]},
+        "high_inflation_weak_growth": {"type": "string", "enum": ["tighten", "hold", "ease"]},
+        "low_inflation_positive_growth": {"type": "string", "enum": ["tighten", "hold", "ease"]},
+        "low_inflation_weak_growth": {"type": "string", "enum": ["tighten", "hold", "ease"]},
+        "near_target": {"type": "string", "enum": ["tighten", "hold", "ease"]}
+      }
+    },
+    "risk_management": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["max_step_bps", "consider_policy_lags", "avoid_unnecessary_reversal"],
+      "properties": {
+        "max_step_bps": {"type": "integer", "enum": [25, 50, 75]},
+        "consider_policy_lags": {"type": "boolean"},
+        "avoid_unnecessary_reversal": {"type": "boolean"}
+      }
+    },
+    "review_interval": {"type": "integer", "enum": [4, 8, 12]}
+  }
+}

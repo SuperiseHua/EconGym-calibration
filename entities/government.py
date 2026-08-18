@@ -34,12 +34,18 @@ class Government(BaseEntity):
 
         initial_actions = self.entity_args[self.type]['initial_action']
 
+        if self.type == "central_bank":
+            self.base_interest_rate = initial_actions["base_interest_rate"]
+            self.reserve_ratio = initial_actions["reserve_ratio"]
+
         self.initial_action = np.concatenate(
             [np.array(list(initial_actions.values())),
              np.ones(self.action_dim - self.policy_action_len) / (self.action_dim - self.policy_action_len)])
 
         self.per_household_gdp = real_gdp / real_population
         self.GDP = self.per_household_gdp * households_n
+        self.real_GDP = self.GDP
+        self.nominal_GDP = self.GDP
         self.Bt_next = real_debt_rate * self.GDP
         self.Bt = copy.copy(self.Bt_next)
         self.pension_fund = self.entity_args.get('initial_pension_fund', 1e-8)
@@ -97,7 +103,9 @@ class Government(BaseEntity):
         self.Bt_next = ((1 + society.bank.base_interest_rate) * self.Bt + np.sum(
             self.gov_spending * society.market.price) - np.sum(self.tax_array))
 
-        self.GDP = np.sum(society.market.price * society.market.Yt_j)
+        self.real_GDP = np.sum(society.market.Yt_j)
+        self.nominal_GDP = np.sum(society.market.price * society.market.Yt_j)
+        self.GDP = self.real_GDP  # Backward-compatible name used by growth calculations.
         self.per_household_gdp = self.GDP / max(households.households_n, 1e-8)
 
     def pension_step(self, society):

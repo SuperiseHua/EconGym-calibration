@@ -1,0 +1,11 @@
+document/.DS_Store
+document/.DS_Store
+agents/.DS_Store
+static/.DS_Store
+viz/.DS_Store
+*.iml
+/.idea
+*.pyc
+/agents/models/inflation_control
+/viz/data
+/static

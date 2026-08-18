@@ -12,6 +12,7 @@ from omegaconf import ListConfig
 sys.path.append(os.path.abspath('../..'))
 from agents.log_path import make_logpath, save_args
 from utils.experience_replay import ReplayBuffer
+from utils.evaluation_report import report_evaluation
 from datetime import datetime
 
 torch.autograd.set_detect_anomaly(True)
@@ -21,7 +22,17 @@ class NumpyEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, np.ndarray):
             return obj.tolist()
+        if isinstance(obj, (np.integer, np.floating)):
+            return obj.item()
         return super(NumpyEncoder, self).default(obj)
+
+
+def clean_metric(value):
+    """Convert scalar-shaped NumPy metrics to plain numbers for readable reports."""
+    array = np.asarray(value)
+    if array.size == 1:
+        return array.item()
+    return array.tolist()
 
 
 class Runner:
@@ -89,7 +100,7 @@ class Runner:
         rl_agent_list = ['ppo', 'ddpg', 'sac']  # extendable list of RL agents
         if getattr(policy, "name", None) not in rl_agent_list:
             return action  # skip if this is not an RL agent
-    
+
         # Locate the corresponding agent entity
         if "." in path:
             main, sub = path.split(".", 1)
@@ -103,7 +114,7 @@ class Runner:
             action_min = np.array(action_min, dtype=np.float32)
         if isinstance(action_max, ListConfig):
             action_max = np.array(action_max, dtype=np.float32)
-       
+
         # Scale to [action_min, action_max]
         action = action_min + (action + 1.0) * (action_max - action_min) / 2.0
         return action
@@ -118,7 +129,7 @@ class Runner:
             raw_actions_dict: actions directly from policy.get_action (for replay buffer)
             processed_actions_dict: actions scaled/processed for environment execution
         """
-    
+
         def act(policy, obs, path=""):
             if isinstance(policy, dict):
                 raw, proc = {}, {}
@@ -126,7 +137,7 @@ class Runner:
                     raw_k, proc_k = act(policy[k], obs[k], f"{path}.{k}" if path else k)
                     raw[k], proc[k] = raw_k, proc_k
                 return raw, proc
-        
+
             try:
                 action = policy.get_action(obs)
                 # Raw action (saved into replay buffer)
@@ -134,7 +145,7 @@ class Runner:
                 # Processed action (executed in the environment)
                 proc_action = self._process_rl_action(policy, action, path)
                 return raw_action, proc_action
-        
+
             except KeyError as e:
                 print(f"[Warning] obs missing key at '{path}': {e}")
                 return None, None
@@ -143,12 +154,22 @@ class Runner:
                     f"[Warning] get_action failed at '{path}' "
                     f"for policy {getattr(policy, 'name', type(policy).__name__)}: {e}")
                 return None, None
-    
+
         raw_actions_dict, processed_actions_dict = act(self.agents_policy, obs_dict_tensor)
         return raw_actions_dict, processed_actions_dict
 
+    def reset_agent_episodes(self):
+        def reset(policy):
+            if isinstance(policy, dict):
+                for item in policy.values():
+                    reset(item)
+            elif hasattr(policy, "reset_episode"):
+                policy.reset_episode()
+        reset(self.agents_policy)
+
     def run(self):
         obs_dict = self.envs.reset()
+        self.reset_agent_episodes()
 
         for epoch in range(self.args.n_epochs):
             transition_dict = {
@@ -184,6 +205,7 @@ class Runner:
                 obs_dict = next_obs_dict
                 if done:
                     obs_dict = self.envs.reset()
+                    self.reset_agent_episodes()
 
             for agent_name in self.agents_policy:
                 sub_agent_policy = self.agents_policy[agent_name]
@@ -248,7 +270,20 @@ class Runner:
 
     def test(self):
         ''' record the actions of gov and households'''
-        economic_idicators_dict = self._evaluate_agent(write_evaluate_data=False)
+        results = self._evaluate_agent(write_evaluate_data=False, return_episodes=True)
+        results["experiment"] = {
+            "run": self.model_path.name,
+            "problem_scene": self.eval_env.problem_scene,
+            "central_bank_alg": self.args.get("central_bank_gov_alg", self.args.get("gov_alg")),
+            "seed": self.args.seed,
+            "eval_episodes": self.args.eval_episodes,
+        }
+        report_evaluation(results, self.model_path.parent / "evaluation_comparison.csv")
+        result_path = self.model_path / "evaluation_results.json"
+        with open(result_path, "w") as file:
+            json.dump(results, file, cls=NumpyEncoder, indent=2)
+        print(f"Evaluation results saved to: {result_path}")
+        return results
 
     def viz_data(self, house_model_path, government_model_path):
         self.house_agent.load(dir_path=house_model_path)
@@ -281,7 +316,8 @@ class Runner:
             "house_wealth": self.eval_env.households.at_next,
             "house_wealth_tax": self.eval_env.households.asset_tax,
             "per_gdp": self.eval_env.main_gov.per_household_gdp,
-            "GDP": self.eval_env.main_gov.GDP,  # sum
+            "GDP": self.eval_env.main_gov.GDP,  # real GDP, sum
+            "nominal_GDP": self.eval_env.main_gov.nominal_GDP,
             "firm_production": self.eval_env.market.Yt_j,  # sum
             "income_gini": self.eval_env.income_gini,
             "wealth_gini": self.eval_env.wealth_gini,
@@ -326,10 +362,10 @@ class Runner:
                      (sublist if isinstance(sublist, (list, np.ndarray)) else [sublist])]
         return np.mean(flat_list)
 
-    def _evaluate_agent(self, write_evaluate_data=False):
+    def _evaluate_agent(self, write_evaluate_data=False, return_episodes=False):
         eval_econ = ["gov_reward", "tax_gov_reward", "central_bank_gov_reward", "pension_gov_reward",
                      "house_reward", "social_welfare", "per_gdp", "income_gini", "firm_production",
-                     "wealth_gini", "years", "GDP", "gov_spending", "house_total_tax", "house_income_tax",
+                     "wealth_gini", "years", "GDP", "nominal_GDP", "gov_spending", "house_total_tax", "house_income_tax",
                      "house_wealth_tax", "house_wealth", "house_income", "house_consumption", "house_pension",
                      "house_work_hours", "total_labor", "WageRate", "price", "house_age", "firm_reward", "bank_reward", "deposit_rate", "lending_rate"]
 
@@ -345,12 +381,13 @@ class Runner:
             eval_econ += [
                 "inflation_rate", "inflation_gap", "growth_gap", "base_interest_rate", "reserve_ratio"
             ]
-        obs_dict = self.eval_env.reset()
         episode_econ_dict = dict(zip(eval_econ, [[] for i in range(len(eval_econ))]))
         # final_econ_dict = dict(zip(eval_econ, [None for i in range(len(eval_econ))]))
-        final_econ_dict = {}
+        final_econ_dict, episode_results = {}, []
 
         for epoch_i in range(self.args.eval_episodes):
+            obs_dict = self.eval_env.reset()
+            self.reset_agent_episodes()
             eval_econ_dict = dict(zip(eval_econ, [[] for i in range(len(eval_econ))]))
             t = 0
             while True:
@@ -369,11 +406,10 @@ class Runner:
 
                 obs_dict = next_obs_dict
                 if done:
-                    obs_dict = self.eval_env.reset()
                     break
 
             for key, value in eval_econ_dict.items():
-                if key == "gov_reward" or key == "GDP" or key == "bank_reward" or key == "firm_reward":
+                if key in {"gov_reward", "GDP", "nominal_GDP", "bank_reward", "firm_reward"}:
                     episode_econ_dict[key].append(np.sum(value, axis=0))
                 elif key == "price" or key == "WageRate" or key == "firm_production":
                     episode_econ_dict[key].append(np.mean(value, axis=0))
@@ -387,6 +423,11 @@ class Runner:
                     episode_econ_dict[key].append(value)
                 else:
                     episode_econ_dict[key].append(np.mean(value))
+
+            episode_results.append({
+                "episode": epoch_i + 1,
+                **{key: clean_metric(episode_econ_dict[key][-1]) for key in episode_econ_dict},
+            })
 
         for key, value in episode_econ_dict.items():
             value = np.array(value)
@@ -404,7 +445,7 @@ class Runner:
             if gov_return > self.eva_reward_indicator:
                 write_evaluate_data = True
                 self.eva_reward_indicator = copy.deepcopy(gov_return)
-        
+
         # write_evaluate_data=False
         if write_evaluate_data:
             store_path = "viz/data/"
@@ -418,4 +459,6 @@ class Runner:
 
             print("============= Finish Writing================")
 
+        if return_episodes:
+            return {"episodes": episode_results, "aggregate": final_econ_dict}
         return final_econ_dict

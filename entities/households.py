@@ -264,6 +264,7 @@ class Household(BaseEntity):
         consumption_ij = (money_for_consumption * self.c_ij_ratio) / society.market.price.T
 
         households_demand = np.sum(consumption_ij, axis=0).reshape(-1, 1)
+        self.planned_consumption_demand = households_demand
         goods_supply = society.market.Yt_j
         success_households_deals = np.minimum(households_demand, goods_supply)
 
@@ -398,6 +399,7 @@ class Household(BaseEntity):
         consumption_ij = (money_for_consumption * self.c_ij_ratio) / society.market.price.T
 
         households_demand = np.sum(consumption_ij, axis=0).reshape(-1, 1)
+        self.planned_consumption_demand = households_demand
         goods_supply = society.market.Yt_j
         success_households_deals = np.minimum(households_demand, goods_supply)
 

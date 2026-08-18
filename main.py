@@ -68,9 +68,15 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--problem_scene", type=str, default='inflation_control', help="Problem scene to simulate")
+    parser.add_argument("--central_bank_alg", choices=agent_algorithms, help="Override the central-bank algorithm")
+    parser.add_argument("--eval_episodes", type=int, help="Override the number of evaluation episodes")
     args = parser.parse_args()
 
     config = load_config(args.problem_scene)
+    if args.central_bank_alg:
+        config['Trainer']['central_bank_gov_alg'] = args.central_bank_alg
+    if args.eval_episodes:
+        config['Trainer']['eval_episodes'] = args.eval_episodes
     set_seeds(config['Trainer']['seed'], cuda=config['Trainer']['cuda'])
     os.environ['CUDA_VISIBLE_DEVICES'] = str(config['device_num'])
 

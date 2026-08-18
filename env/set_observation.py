@@ -113,10 +113,12 @@ class EconObservations:
                 observations = np.concatenate([common_obs, np.array([self.government[gov_type].Bt])])  # + debt
 
             elif gov_type == "central_bank":
-                observations = np.concatenate([
-                    common_obs,
-                    np.array([getattr(self.society, 'inflation_rate', 0.02)]),
-                    np.array([getattr(self.society, 'growth_rate', 0.05)]),
+                observations = np.array([
+                    getattr(self.society, 'inflation_rate', 0.02),
+                    getattr(gov_agent, 'growth_rate', 0.05),
+                    getattr(gov_agent, 'base_interest_rate', 0.03),
+                    getattr(gov_agent, 'reserve_ratio', 0.08),
+                    getattr(self.bank, 'lending_rate', 0.0345),
                 ])
 
             elif gov_type == "pension":

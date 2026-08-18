@@ -16,7 +16,7 @@ class GovernmentRules:
                        noise=0.002, reserve_ratio=0.08):
         """Taylor rule: r = r* + π + φπ(π-π*) + φg(g-g*)."""
         arr = np.ravel(obs)
-        pi_t, g_t = float(arr[-2]), float(arr[-1])
+        pi_t, g_t = float(arr[0]), float(arr[1])
         rate = r_star + pi_t + phi_pi * (pi_t - pi_star) + phi_g * (g_t - g_star)
         if noise is not None:
             rate += np.random.normal(0.0, noise)
