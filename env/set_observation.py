@@ -78,13 +78,15 @@ class EconObservations:
             # education = getattr(self.households, 'e_write', np.zeros(self.households.households_n))
 
             wealth = getattr(self.households, 'at_next', np.zeros(self.households.households_n))
-            education = getattr(self.households, 'e', np.zeros(self.households.households_n))
+            # EDUC is used for data matching; calibrated efficiency e remains a
+            # separate production input and is still included in global states.
+            education = getattr(self.households, 'education_init', np.zeros(n_households))
             age = getattr(self.households, 'age', np.zeros(n_households))
             # Each household's private obs: [education, wealth, age]
             private_obs_per_household = np.column_stack([education, wealth, age])
         elif "ramsey" in self.households.type:
             wealth = getattr(self.households, 'at_next', np.zeros(self.households.households_n))
-            education = getattr(self.households, 'e', np.zeros(self.households.households_n))
+            education = getattr(self.households, 'education_init', np.zeros(n_households))
             # Each household's private obs: [education, wealth]
             private_obs_per_household = np.column_stack([education, wealth])
         else:
@@ -154,8 +156,8 @@ class EconObservations:
                 getattr(self.bank, 'reserve_ratio', 0.0),
                 getattr(self.bank, 'lending_rate', 0.0345),  # Lending rate of the previous period
                 getattr(self.bank, 'deposit_rate', 0.0345),  # Deposit rate of the previous period
-                getattr(self.bank, 'current_loans', 0.0),  # Total loans given out in the previous period
-                getattr(self.bank, 'total_account', 0.0),  # Total deposits received in the previous period
+                self.bank.current_loans,  # Private fixed-investment loans from the previous period
+                self.bank.total_deposits,  # Household deposits from the previous period
             ])
 
         else:
@@ -174,25 +176,24 @@ class EconObservations:
             return np.array([])
         elif self.market.type.lower() in ["monopoly", "oligopoly", "monopolistic_competition"]:
             firm_n = getattr(self.market, 'firm_n', 0.0)
-            firm_capital = getattr(self.market, 'Kt_next', 0.0)
-            firm_productivity = getattr(self.market, 'Zt', 0.0)
+            firm_capital = np.asarray(
+                getattr(self.market, 'Kt_next', 0.0)
+            ).reshape(firm_n, 1)
+            firm_productivity = np.asarray(
+                getattr(self.market, 'Zt', 0.0)
+            ).reshape(firm_n, 1)
             firm_rt = np.full((firm_n, 1), getattr(self.bank, 'lending_rate', 0.0))
-            if firm_n > 0:
-                firm_capital_2d = np.full((firm_n, 1), firm_capital)  # Shape (firm_n, 1)
-                firm_productivity_2d = np.full((firm_n, 1), firm_productivity)  # Shape (firm_n, 1)
-            else:
-                # If firm_n = 0, avoid dimension errors
-                firm_capital_2d = np.array([[firm_capital]])
-                firm_productivity_2d = np.array([[firm_productivity]])
-                firm_rt = np.array([[firm_rt]])  # Ensure firm_rt is also 2D
-        
-            # At this point, all arrays are 2D with shape (firm_n, 1), safe for horizontal stacking
-            result = np.hstack([firm_capital_2d, firm_productivity_2d, firm_rt])
+            firm_labor = np.asarray(
+                getattr(self.market, 'firm_labor_j', self.market.initial_labor_j)
+            ).reshape(firm_n, 1)
+            price = np.asarray(self.market.price).reshape(firm_n, 1)
+            wage = np.asarray(self.market.WageRate).reshape(firm_n, 1)
+            result = np.hstack([
+                firm_capital, firm_productivity, firm_rt,
+                firm_labor, price, wage,
+            ])
         
             return result
-            # wage_rate = getattr(self.market, 'WageRate', 0.0) if self.market else 0.0    # Optionally add price and WageRate at the last timestep
-            # price_level = getattr(self.market, 'price', 1.0) if self.market else 1.0
-            # return np.hstack([firm_capital, firm_productivity, firm_rt])
     
         else:
             raise ValueError(f"FirmTypeError: market type {self.market.type} is not supported.")

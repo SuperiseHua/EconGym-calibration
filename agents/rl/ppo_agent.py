@@ -181,11 +181,11 @@ class ppo_agent:
             torch.nn.utils.clip_grad_norm_(self.net.parameters(), 0.5)
             self.optimizer.step()
 
-            sum_loss[0] += actor_loss
-            sum_loss[1] += critic_loss
+            sum_loss[0] += actor_loss.detach()
+            sum_loss[1] += critic_loss.detach()
 
         self.scheduler.step()
-        return sum_loss[0], sum_loss[1]
+        return sum_loss[0].item(), sum_loss[1].item()
 
     def get_action(self, obs_tensor):
         if self.agent_name == "bank" and self.agent_type == "non_profit":

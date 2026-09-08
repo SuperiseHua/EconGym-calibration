@@ -17,6 +17,21 @@ class Government(BaseEntity):
         self.real_action_max = np.array(entity_args[self.type]['real_action_max'])
         self.real_action_min = np.array(entity_args[self.type]['real_action_min'])
 
+    @staticmethod
+    def compute_scale_factor(real_population, real_household_units, agents_n, household_type):
+        """Scale SCF-backed agents by the represented family/PEU population."""
+        if real_household_units <= 0:
+            raise ValueError("The real SCF family-unit count must be positive.")
+        return agents_n / real_household_units
+
+    @staticmethod
+    def compute_initial_gdp(real_gdp, real_population, real_household_units,
+                            agents_n, household_type):
+        """Scale aggregate GDP to the number of simulated SCF family/PEU agents."""
+        return real_gdp * Government.compute_scale_factor(
+            real_population, real_household_units, agents_n, household_type
+        )
+
     def reset(self, **custom_cfg):
         if self.type == 'tax' and self.tax_type == 'saez':
             self.saez_gov = SaezGovernment()
@@ -25,6 +40,8 @@ class Government(BaseEntity):
         real_gdp = self.real_gdp
         real_debt_rate = self.real_debt_rate
         real_population = self.real_population
+        real_household_units = custom_cfg['real_household_units']
+        household_type = custom_cfg['household_type']
 
         self.action_space = Box(
             low=self.entity_args[self.type]["action_space"]["low"],
@@ -33,30 +50,50 @@ class Government(BaseEntity):
         )
 
         initial_actions = self.entity_args[self.type]['initial_action']
+        for name in ('tau', 'xi', 'tau_a', 'xi_a', 'Gt_prob'):
+            setattr(self, name, self.entity_args.params[name])
+        for name, value in initial_actions.items():
+            setattr(self, name, value)
 
         if self.type == "central_bank":
             self.base_interest_rate = initial_actions["base_interest_rate"]
             self.reserve_ratio = initial_actions["reserve_ratio"]
 
-        self.initial_action = np.concatenate(
-            [np.array(list(initial_actions.values())),
-             np.ones(self.action_dim - self.policy_action_len) / (self.action_dim - self.policy_action_len)])
+        policy_action = np.array(list(initial_actions.values()))[:self.policy_action_len]
+        allocation_dim = self.action_dim - self.policy_action_len
+        allocation = np.full(allocation_dim, 1 / allocation_dim) if allocation_dim else np.array([])
+        self.initial_action = np.concatenate([policy_action, allocation])
 
-        self.per_household_gdp = real_gdp / real_population
-        self.GDP = self.per_household_gdp * households_n
+        # Static macro inputs and household microdata currently refer to the United States in 2022.
+        # TODO(data-channel): replace them with metadata from an uploaded country-year data source.
+        self.scale_factor = self.compute_scale_factor(
+            real_population, real_household_units, households_n, household_type
+        )
+        self.GDP = real_gdp * self.scale_factor
+        self.old_GDP = self.GDP
+        self.growth_rate = 0.05  # Preserve the declared initial observation, never the last episode.
+        self.per_household_gdp = self.GDP / households_n
+        self.old_per_gdp = self.per_household_gdp
+        self.initial_GDP = self.GDP
         self.real_GDP = self.GDP
         self.nominal_GDP = self.GDP
         self.Bt_next = real_debt_rate * self.GDP
         self.Bt = copy.copy(self.Bt_next)
         self.pension_fund = self.entity_args.get('initial_pension_fund', 1e-8)
-        self.contribution_rate = self.entity_args.params.contribution_rate
-        self.retire_age = self.entity_args.params.retire_age
+        self.contribution_rate = initial_actions.get('contribution_rate', self.entity_args.params.contribution_rate)
+        self.retire_age = initial_actions.get('retire_age', self.entity_args.params.retire_age)
         self.old_percent = 0
         self.dependency_ratio = 0
+        self.estate_tax_revenue = 0.
+        self.deceased_direct_tax_revenue = 0.
+        self.deceased_consumption_tax_revenue = 0.
+        self.bond_interest_expense = 0.0
+        self.gov_spending_d = np.zeros((firm_n, 1))
+        self.gov_spending = np.zeros((firm_n, 1))
+        self._spending_step = -1
 
         # Initialize Gt_prob_j as an empty array or with a default value to avoid AttributeError
-        self.Gt_prob_j = np.ones((firm_n, 1)) * self.Gt_prob if self.action_dim > self.entity_args[self.type][
-            'action_dim'] else 1
+        self.Gt_prob_j = np.full((firm_n, 1), self.Gt_prob / firm_n)
 
     def get_action(self, actions, firm_n):
 
@@ -76,7 +113,8 @@ class Government(BaseEntity):
 
         if firm_n != 1:
             if np.sum(Gt_prob_ratios) == 0:
-                self.Gt_prob_j = np.zeros_like(Gt_prob_ratios)[:, np.newaxis]
+                # No allocation preference means equal shares, not an erased budget.
+                self.Gt_prob_j = np.full((firm_n, 1), self.Gt_prob / firm_n)
             else:
                 self.Gt_prob_j = (Gt_prob_ratios / np.sum(Gt_prob_ratios))[:, np.newaxis] * self.Gt_prob
         else:
@@ -91,17 +129,29 @@ class Government(BaseEntity):
         if self.type == "pension" and ("OLG" in society.households.type):
             self.pension_step(society)
 
+    def plan_spending(self, society):
+        """Set desired and goods-constrained government purchases for this period."""
+        nominal_output = float(np.sum(society.market.price * society.market.Yt_j))
+        self.gov_spending_d = self.Gt_prob_j * nominal_output / society.market.price
+        if hasattr(society.households, 'BUI'):
+            self.gov_spending_d += society.households.households_n * society.households.BUI
+        self.gov_spending = np.minimum(self.gov_spending_d, society.market.goods_supply)
+        self._spending_step = society.step_cnt
+
     def tax_step(self, society):
         """Calculate government metrics such as taxes, investment, and GDP."""
         households = society.households
-        self.tax_array = (households.income_tax + households.asset_tax + np.dot(households.final_consumption,
-                                                                                society.market.price) * society.consumption_tax_rate) + households.estate_tax
-        self.gov_spending = self.Gt_prob_j * society.market.Yt_j
-        # BUI is the amount of money distributed.
-        if hasattr(households, 'BUI'):
-            self.gov_spending += households.households_n * households.BUI
-        self.Bt_next = ((1 + society.bank.base_interest_rate) * self.Bt + np.sum(
-            self.gov_spending * society.market.price) - np.sum(self.tax_array))
+        if self._spending_step != society.step_cnt:
+            self.plan_spending(society)
+        self.tax_array = households.income_tax + households.asset_tax + households.consumption_tax
+        self.estate_tax_revenue = households.estate_tax
+        self.deceased_direct_tax_revenue = households.deceased_direct_tax
+        self.deceased_consumption_tax_revenue = households.deceased_consumption_tax
+        self.bond_interest_expense = society.bank.government_interest_payment
+        self.Bt_next = (self.Bt + self.bond_interest_expense + np.sum(
+            self.gov_spending * society.market.price)
+                        - np.sum(self.tax_array) - self.estate_tax_revenue
+                        - self.deceased_direct_tax_revenue - self.deceased_consumption_tax_revenue)
 
         self.real_GDP = np.sum(society.market.Yt_j)
         self.nominal_GDP = np.sum(society.market.price * society.market.Yt_j)
@@ -160,26 +210,24 @@ class Government(BaseEntity):
 
         return income_tax, asset_tax
 
+    @staticmethod
+    def reference_federal_income_tax(income):
+        """Shared existing model schedule; not a complete US household tax model."""
+        income = np.asarray(income, dtype=float)
+        personal_allowance = 12950
+        tax_credit = 559.98
+        marginal_rates = np.array([10, 12, 22, 24, 32, 35, 37]) / 100
+        thresholds = np.array([0, 10275, 41775, 89075, 170050, 215950, 539900, np.inf])
+        taxable_income = np.maximum(0, income - personal_allowance)
+        taxes_paid = np.zeros_like(income, dtype=float)
+        for i in range(1, len(thresholds)):
+            income_in_bracket = np.minimum(taxable_income, thresholds[i]) - thresholds[i - 1]
+            taxes_paid += np.maximum(0, income_in_bracket) * marginal_rates[i - 1]
+        return np.maximum(0, taxes_paid - tax_credit)
+
     def calculate_progressive_taxes(self, income, asset):
         """Calculate income and asset taxes based on US federal tax brackets."""
-
-        def income_tax_function(x):
-            personal_allowance = 12950
-            tax_credit = 559.98
-            marginal_rates = np.array([10, 12, 22, 24, 32, 35, 37]) / 100  # as decimals
-            thresholds = np.array([0, 10275, 41775, 89075, 170050, 215950, 539900, np.inf])
-
-            taxable_income = np.maximum(0, x - personal_allowance)
-            taxes_paid = np.zeros_like(x, dtype=float)
-
-            for i in range(1, len(thresholds)):
-                income_in_bracket = np.minimum(taxable_income, thresholds[i]) - thresholds[i - 1]
-                taxes_paid += np.maximum(0, income_in_bracket) * marginal_rates[i - 1]
-
-            taxes_paid = np.maximum(0, taxes_paid - tax_credit)
-            return taxes_paid
-
-        income_tax = income_tax_function(income)
+        income_tax = self.reference_federal_income_tax(income)
 
         _, asset_tax = self.tax_function(income, asset)
         return income_tax, asset_tax

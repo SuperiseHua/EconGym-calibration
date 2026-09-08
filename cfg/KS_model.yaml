@@ -21,7 +21,6 @@ Environment:
         params:
           type: "perfect"   #  type_list: [ 'perfect', 'monopoly', 'monopolistic_competition', 'oligopoly' ]
           alpha: 0.36
-          Z: 10.0
           sigma_z: 0.0038
           epsilon: 0.5
 

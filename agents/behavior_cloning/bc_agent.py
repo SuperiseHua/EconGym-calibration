@@ -4,6 +4,8 @@ import copy
 import torch
 import numpy as np
 import pandas as pd
+from agents.behavior_cloning.scf_labels import build_scf_consumption_labels, saving_share
+from entities.government import Government
 from agents.rl.models import mlp_net
 import torch.nn.functional as F
 from torch.optim.lr_scheduler import LambdaLR
@@ -42,9 +44,9 @@ class bc_agent:
         
         # special setting for BC: The real dataset only contains partial observations
         if "ramsey" in self.type:
-            self.bc_obs_dim = 2  # [education, wealth]
+            self.bc_obs_dim = 2  # [raw education, wealth]
         elif "OLG" in self.type:
-            self.bc_obs_dim = 3  # [education, wealth, age]
+            self.bc_obs_dim = 3  # [raw education, wealth, age]
         else:
             raise ValueError(f"Agent type Error: No {self.type} in EconGym.")
         
@@ -85,8 +87,18 @@ class bc_agent:
         Returns: The loss for the current training step.
         """
         if not self.args.bc_test:
-            house_obses = [torch.tensor(obs[self.agent_name][:, -self.bc_obs_dim:], dtype=torch.float32) for obs in transition_dict['obs_dict']]
-            house_actions = [torch.tensor(obs[self.agent_name], dtype=torch.float32) for obs in transition_dict['action_dict']]
+            # ReplayBuffer.sample() already extracts the requested agent. Accept
+            # full dictionaries as well for backward compatibility with direct calls.
+            def get_households(sample):
+                return sample[self.agent_name] if isinstance(sample, dict) else sample
+            house_obses = [
+                torch.as_tensor(get_households(obs)[:, -self.bc_obs_dim:], dtype=torch.float32)
+                for obs in transition_dict['obs_dict']
+            ]
+            house_actions = [
+                torch.as_tensor(get_households(action), dtype=torch.float32)
+                for action in transition_dict['action_dict']
+            ]
 
             # Pad sequences for household data
             obs_tensor = rnn_utils.pad_sequence(house_obses, batch_first=True).to(self.device)
@@ -105,9 +117,9 @@ class bc_agent:
             # Update learning rate
             self.scheduler.step()
 
-            return bc_loss, torch.tensor(0.)
+            return bc_loss.detach().item(), 0.0
         else:
-            return torch.tensor(0.), torch.tensor(0.)
+            return 0.0, 0.0
 
     def get_action(self, full_obs_tensor):
         """
@@ -122,7 +134,7 @@ class bc_agent:
         if self.agent_name != "households":
             raise ValueError("AgentError: Behavior cloning method is suitable for household agents only.")
         
-        obs_tensor = full_obs_tensor[:, -self.bc_obs_dim:]   # Each household's private obs: [education, wealth, age (optional)]
+        obs_tensor = full_obs_tensor[:, -self.bc_obs_dim:]   # [raw education, wealth, age (optional)]
         
         if self.args.bc_test:
             _, pi = self.net(obs_tensor)
@@ -163,35 +175,45 @@ class bc_agent:
             if df.empty:
                 raise ValueError(f"No data available for individuals aged {age_limit}.")
 
-        columns = ['EDUC', 'ASSET', 'INCOME', 'AGE']
+        # Match the environment's private observations:
+        # Ramsey [raw education, wealth], OLG [raw education, wealth, age].
+        columns = ['EDUC', 'ASSET', 'AGE']
         data = [df[col].values for col in columns]
 
-        consumption_p = (df['FOODHOME'].values + df['FOODAWAY'].values + df['FOODDELV'].values +
-                         df['RENT'].values + df['TPAY'].values + 0.0001) / (df['ASSET'].values + 0.0001)
+        # Labels and household execution both use an after-tax income denominator.
+        # Keep a fixed reference tax schedule when constructing survey labels;
+        # subsequent simulated policy changes must not rewrite observed labels.
+        saving_p, self.label_metadata = build_scf_consumption_labels(
+            df, Government.reference_federal_income_tax
+        )
         invest_p = df['FIN'].values / (df['ASSET'].values + 0.0001)
 
-        # Append in the new order: 1 - consumption_p, then LF, then invest_p
-        consumption_p_cliped = np.clip(consumption_p, 0, 1)
-        data.append(1 - consumption_p_cliped)  # saving ratio
+        # Append in the order expected by household actions: saving, labor, investment.
+        data.append(saving_p)
         data.append(df['LF'].values)
         data.append(invest_p)
 
         return data
+
+    @staticmethod
+    def compute_saving_rate(income, observed_consumption, lower=-0.5, upper=1.0):
+        """Convert consumption / disposable income into the unspent income share."""
+        return saving_share(income, observed_consumption, lower, upper)
 
     def find_expert_action(self, private_obs_tensor, real_data):
         """
         Find expert actions from real_data that correspond to the closest observations to private_obs_tensor.
 
         Args:
-            private_obs_tensor (torch.Tensor): Tensor of shape (N, m) where m=4 (ASSET, EDUC, INCOME, AGE).
-            real_data (list): List of arrays from get_real_data, containing [ASSET, EDUC, INCOME, AGE, LF, consumption_p, invest_p].
+            private_obs_tensor (torch.Tensor): Private observations [education/efficiency, wealth, age (optional)].
+            real_data (list): [EDUC, ASSET, AGE, saving_p, LF, invest_p].
 
         Returns:
-            torch.Tensor: Tensor of shape (N, 3) containing expert actions [LF, consumption_p, invest_p].
+            torch.Tensor: Tensor of shape (N, 3) containing expert actions [saving_p, LF, invest_p].
         """
         # Extract observation and action components from real_data
-        real_obs = np.stack(real_data[:self.bc_obs_dim],axis=1)  # Shape: (D, obs_dim) for ASSET, EDUC, AGE(optional)
-        real_actions = np.stack(real_data[4:], axis=1)  # Shape: (D, 3) for LF, consumption_p, invest_p
+        real_obs = np.stack(real_data[:self.bc_obs_dim],axis=1)  # [EDUC, ASSET, AGE(optional)]
+        real_actions = np.stack(real_data[3:], axis=1)  # Shape: (D, 3) for saving_p, LF, invest_p
 
         # Convert to tensors
         real_obs_tensor = torch.tensor(real_obs, dtype=torch.float32).to(
@@ -201,7 +223,7 @@ class bc_agent:
 
         obs_mean = real_obs_tensor.mean(dim=0, keepdim=True)  # Shape: (1, obs_dim)
         obs_std = real_obs_tensor.std(dim=0,
-                                      keepdim=True) + 1e-6  # Shape: (1, 4), add small epsilon to avoid division by zero
+                                      keepdim=True) + 1e-6  # Add epsilon to avoid division by zero.
 
         # Normalize real observations and private_obs_tensor
         norm_real_obs = (real_obs_tensor - obs_mean) / obs_std  # Shape: (D, obs_dim)

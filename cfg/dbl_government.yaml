@@ -30,7 +30,7 @@ Environment:                       # Parameters for the environment
           tax_type: "ai_agent"     # Tax agent type ("ai_agent", "us_federal", "saez")
           real_gdp: 254746e8       # Initial real GDP (USD)
           real_debt_rate: 1.2129   # Initial government debt-to-GDP ratio
-          real_population: 333428e3 # Initial population size
+          real_population: 333428e3 # Retained for demographic statistics; not the SCF scaling denominator
         central_bank:
           type: "central_bank"     # Central bank policy agent
           action_dim: 2            # Dimension of action space
@@ -63,7 +63,7 @@ Environment:                       # Parameters for the environment
           tax_type: "ai_agent"     # Tax agent type ("ai_agent", "us_federal", "saez")
           real_gdp: 254746e8       # Initial real GDP (USD)
           real_debt_rate: 1.2129   # Initial government debt-to-GDP ratio
-          real_population: 333428e3 # Initial population size
+          real_population: 333428e3 # Retained for demographic statistics; not the SCF scaling denominator
 
         tax:
           type: "tax"              # Fiscal authority agent executing tax policy
@@ -98,6 +98,7 @@ Environment:                       # Parameters for the environment
           rho_e: 0.982                  # Persistence in state transitions (normal/superstar)
           sigma_e: 0.200                # Volatility of standard normal shocks
           super_e: 504.3                # Labor productivity in superstar state
+          education_efficiency_beta: 0.164 # Provisional education-efficiency slope; calibrate later
           at_min: -1e6                  # Minimum asset holdings
           h_max: 2512                   # Maximum annual working hours
           real_action_max: [ 1.0, 1.0 ]   # Max values for (savings share of income, labor share of h_max)
@@ -116,8 +117,8 @@ Environment:                       # Parameters for the environment
           type: "perfect"               # Market type: 'perfect', 'monopoly', 'monopolistic_competition', 'oligopoly'
           type_list: [ 'perfect', 'monopoly', 'monopolistic_competition', 'oligopoly' ] # Supported market types
           alpha: 0.36                   # Capital share in Cobb-Douglas production
-          Z: 1.0                        # Initial productivity level
-          sigma_z: 0.0038               # Std. deviation of productivity shocks
+          # Initial productivity Z_0 is inferred from base-year GDP, capital, and labor.
+          sigma_z: 0.0038               # Maximum per-period log-productivity growth shock; innovation is U(0,1)
           epsilon: 0.5                  # Demand elasticity parameter in CES utility
           real_action_max: [ 1e2, 1e2 ]   # Max values for firm actions (price, wage rate)
           real_action_min: [ 0.0001, 0.0001 ] # Min values for firm actions

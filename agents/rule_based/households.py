@@ -1,11 +1,83 @@
 import numpy as np
 import torch
+from functools import lru_cache
+from pathlib import Path
 
 class HouseholdRules:
-    """
-    Rule set for household behavior based on demographic and country-specific patterns.
-    Includes saving, risky investment, and 'advance consumption' (adv_consume) behavior.
-    """
+    """可切换的家庭消费、劳动与旧年龄分组规则。"""
+
+    @staticmethod
+    def get_action(type, obs, action_dim, firm_n, country="China", rule="age_profile",
+                   consumption_share=0.95, labor_rule="initial", initial_work=None,
+                   labor_share=0.5):
+        """切换入口：fixed_consumption 为自定义总消费规则；age_profile 保留旧抽样规则。"""
+        if rule == "age_profile":
+            # 旧规则同时抽样储蓄、劳动和风险投资；不使用下方固定比例参数。
+            return HouseholdRules.age_profile(type, obs, action_dim, firm_n, country)
+        if rule != "fixed_consumption":
+            raise ValueError(f"Unknown household_rule: {rule}")
+        labor_rules = {
+            "initial": lambda: HouseholdRules.initial_labor(initial_work, len(obs)),
+            "constant": lambda: HouseholdRules.constant_labor(labor_share, len(obs)),
+            "scf": lambda: HouseholdRules.scf_labor(type, obs),
+        }
+        if labor_rule not in labor_rules:
+            raise ValueError(f"Unknown household_labor_rule: {labor_rule}")
+        return HouseholdRules.fixed_consumption(
+            consumption_share, labor_rules[labor_rule](), action_dim, firm_n)
+
+    @staticmethod
+    def fixed_consumption(consumption_share, labor, action_dim, firm_n):
+        """总消费预算＝比例×税后收入（含消费税）；0.95 表示消费 95%、储蓄动作 5%。
+
+        实际成交与扣税由环境结算。此规则不配置风险资产；多企业时均分消费预算。
+        """
+        if not np.isfinite(consumption_share) or not 0 <= consumption_share <= 1.5:
+            raise ValueError('household_consumption_share must be in [0, 1.5].')
+        action = np.zeros((len(labor), action_dim), dtype=float)
+        action[:, 0] = 1 - consumption_share
+        action[:, 1] = labor
+        if firm_n > 1:
+            action[:, -firm_n-1] = np.random.rand(len(labor))
+            action[:, -firm_n:] = 1 / firm_n
+        return action
+
+    @staticmethod
+    def initial_labor(initial_work, n):
+        """劳动规则 initial：保持每个家庭自身的 SCF 初始劳动比例，保留初始异质性。"""
+        labor = np.asarray(initial_work, dtype=float).reshape(-1)
+        if labor.size != n or not np.isfinite(labor).all() or np.any((labor < 0) | (labor > 1)):
+            raise ValueError('initial labor requires one valid initial work share per household.')
+        return labor
+
+    @staticmethod
+    def constant_labor(labor_share, n):
+        """劳动规则 constant：所有家庭使用同一劳动比例；0.5 表示 h_max 的一半。"""
+        if not np.isfinite(labor_share) or not 0 <= labor_share <= 1:
+            raise ValueError('household_labor_share must be in [0, 1].')
+        return np.full(n, labor_share)
+
+    @staticmethod
+    @lru_cache(maxsize=2)
+    def _scf_labor_data(has_age):
+        # 与原 SCF 最近邻相同的清洗、标准化及距离口径；只读取劳动标签，不创建网络。
+        import pandas as pd
+        path = Path(__file__).resolve().parents[1] / 'data/advanced_scfp2022_1110.csv'
+        frame = pd.read_csv(path).replace([np.inf, -np.inf], np.nan).dropna()
+        columns = ['EDUC', 'ASSET'] + (['AGE'] if has_age else [])
+        return (torch.tensor(np.ascontiguousarray(frame[columns].to_numpy()), dtype=torch.float32),
+                torch.tensor(frame['LF'].to_numpy(), dtype=torch.float32))
+
+    @staticmethod
+    def scf_labor(type, obs):
+        """劳动规则 scf：按教育、财富（OLG 加年龄）寻找 SCF 最近邻，直接取 LF。"""
+        samples, labor = HouseholdRules._scf_labor_data('OLG' in type)
+        obs = torch.as_tensor(obs).detach().to(device='cpu', dtype=torch.float32)
+        mean, std = samples.mean(0), samples.std(0) + 1e-6
+        query = (obs[:, -samples.shape[1]:] - mean) / std
+        reference = (samples - mean) / std
+        nearest = torch.norm(query[:, None, :] - reference[None, :, :], dim=2).argmin(dim=1)
+        return labor[nearest].numpy()
 
     # -------------------------------
     # China: Saving Rate Parameters
@@ -186,9 +258,10 @@ class HouseholdRules:
     # Main household action sampling interface
     # ------------------------------------------
     @staticmethod
-    def get_action(type, obs, action_dim, firm_n):
+    def age_profile(type, obs, action_dim, firm_n, country="China"):
         """
-        Generate rule-based household action vector based on type and observation.
+        旧规则 age_profile：按年龄/国家先验抽样储蓄与风险投资，劳动比例另行随机抽样。
+        These existing heuristic priors are not calibrated household policies.
         Action layout:
             - Column 0: saving proportion in [0, 1] (after adv_consume adjustment if enabled)
             - Column 1: labor supply proportion in [0, 1]
@@ -200,7 +273,6 @@ class HouseholdRules:
         Example: type="OLG_risk_invest_adv_consume"
         """
         N = len(obs)
-        country = "China"  # Default; replace or infer from obs if needed
         action = np.random.randn(N, action_dim)
 
         if "OLG" in type:

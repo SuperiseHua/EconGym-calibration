@@ -35,6 +35,43 @@ def clean_metric(value):
     return array.tolist()
 
 
+def summarize_trajectory(trajectory):
+    """Summarize one episode using scale-free macro diagnostics."""
+    if not trajectory:
+        return {}
+
+    gdp = np.asarray([row["real_gdp"] for row in trajectory], dtype=float)
+    growth = np.asarray([row["gdp_growth"] for row in trajectory], dtype=float)
+    investment = np.asarray([row["investment_gdp"] for row in trajectory], dtype=float)
+    zero_investment = investment <= 1e-10
+    running_peak = np.maximum.accumulate(gdp)
+
+    return {
+        "GDP_end": gdp[-1],
+        "GDP_mean": float(np.mean(gdp)),
+        "GDP_cumulative": float(np.sum(gdp)),
+        "GDP_index_end": trajectory[-1]["real_gdp_index"],
+        "GDP_growth_end": growth[-1],
+        "GDP_growth_mean": float(np.mean(growth)),
+        "GDP_growth_volatility": float(np.std(growth)),
+        "GDP_max_drawdown": float(np.min(gdp / np.maximum(running_peak, 1e-8) - 1)),
+        "price_index_end": trajectory[-1]["price_index"],
+        "inflation_end": trajectory[-1]["inflation_rate"],
+        "inflation_mean": float(np.mean([row["inflation_rate"] for row in trajectory])),
+        "consumption_gdp_mean": float(np.mean([row["consumption_gdp"] for row in trajectory])),
+        "investment_gdp_mean": float(np.mean(investment)),
+        "government_gdp_mean": float(np.mean([row["government_gdp"] for row in trajectory])),
+        "unused_output_gdp_mean": float(np.mean([row["unused_output_gdp"] for row in trajectory])),
+        "zero_investment_share": float(np.mean(zero_investment)),
+        "investment_switch_share": float(np.mean(zero_investment[1:] != zero_investment[:-1]))
+        if len(zero_investment) > 1 else 0.0,
+        "user_cost_floor_share": float(np.mean([row["user_cost_at_floor"] for row in trajectory])),
+        "nonpositive_user_cost_share": float(np.mean([row.get("nonpositive_user_cost", False) for row in trajectory])),
+        "credit_binding_share": float(np.mean([row["credit_binding"] for row in trajectory])),
+        "goods_binding_share": float(np.mean([row["goods_binding"] for row in trajectory])),
+    }
+
+
 class Runner:
     def __init__(self, envs, args, house_agent, government_agent, firm_agent, bank_agent):
         self.envs = copy.deepcopy(envs)
@@ -155,7 +192,31 @@ class Runner:
                     f"for policy {getattr(policy, 'name', type(policy).__name__)}: {e}")
                 return None, None
 
-        raw_actions_dict, processed_actions_dict = act(self.agents_policy, obs_dict_tensor)
+        raw_actions_dict, processed_actions_dict = {}, {}
+        ordered_agents = ["government"] + [
+            name for name in self.agents_policy if name != "government"
+        ]
+        for agent_name in ordered_agents:
+            if agent_name == "bank":
+                central_bank_action = processed_actions_dict.get("government", {}).get("central_bank")
+                if central_bank_action is not None:
+                    bank_obs = obs_dict_tensor[agent_name]
+                    if torch.is_tensor(bank_obs):
+                        bank_obs = bank_obs.clone()
+                        policy_state = torch.as_tensor(
+                            central_bank_action, dtype=bank_obs.dtype, device=bank_obs.device
+                        ).reshape(-1)
+                    else:
+                        bank_obs = np.array(bank_obs, copy=True)
+                        policy_state = np.asarray(central_bank_action).reshape(-1)
+                    bank_obs[..., :2] = policy_state[:2]
+                    obs_dict_tensor[agent_name] = bank_obs
+
+            raw_action, processed_action = act(
+                self.agents_policy[agent_name], obs_dict_tensor[agent_name], agent_name
+            )
+            raw_actions_dict[agent_name] = raw_action
+            processed_actions_dict[agent_name] = processed_action
         return raw_actions_dict, processed_actions_dict
 
     def reset_agent_episodes(self):
@@ -233,16 +294,17 @@ class Runner:
                     wandb.log(economic_idicators_dict)
                     wandb.log(sum_loss)
 
-                firm_reward = np.mean([v for k, v in economic_idicators_dict.items() if k.startswith("firm_reward")])  # if multiple firms, print mean reward. show multiple reward in wandb or swanlab
-
                 print(
-                    "[{}] Epoch: {} / {}, Frames: {}, Gov_Rewards: {:.3f}, Mean_House_Rewards: {:.3f}, Mean_Firm_Rewards: {:.3f}, Bank_Rewards: {:.3f}, years:{:.3f}".format(
+                    "[{}] Epoch: {} / {}, Frames: {} | Real GDP={:.1f} | Growth={:+.1%} | "
+                    "Price={:.1f} | Inflation={:+.1%} | C/Y={:.1%} | I/Y={:.1%} | G/Y={:.1%}".format(
                         datetime.now(), epoch, self.args.n_epochs, (epoch + 1) * self.args.epoch_length,
-                        economic_idicators_dict.get("gov_reward", 0.0),
-                        economic_idicators_dict.get("house_reward", 0.0),
-                        firm_reward,
-                        economic_idicators_dict.get("bank_reward", 0.0),
-                        economic_idicators_dict.get("years", 0.0)
+                        economic_idicators_dict.get("GDP_index_end", 0.0),
+                        economic_idicators_dict.get("GDP_growth_end", 0.0),
+                        economic_idicators_dict.get("price_index_end", 0.0),
+                        economic_idicators_dict.get("inflation_end", 0.0),
+                        economic_idicators_dict.get("consumption_gdp_mean", 0.0),
+                        economic_idicators_dict.get("investment_gdp_mean", 0.0),
+                        economic_idicators_dict.get("government_gdp_mean", 0.0),
                     )
                 )
 
@@ -284,6 +346,48 @@ class Runner:
             json.dump(results, file, cls=NumpyEncoder, indent=2)
         print(f"Evaluation results saved to: {result_path}")
         return results
+
+    def economic_snapshot(self, period, initial_gdp, previous_gdp, expected_inflation):
+        """Return one readable, scale-free snapshot without changing the simulation."""
+        gdp = float(self.eval_env.main_gov.GDP)
+        consumption = float(np.sum(self.eval_env.households.final_consumption))
+        government = float(np.sum(self.eval_env.main_gov.gov_spending))
+        desired = float(np.sum(self.eval_env.bank.desired_fixed_investment))
+        financed = float(np.sum(self.eval_env.bank.financed_fixed_investment))
+        investment = float(np.sum(self.eval_env.bank.actual_fixed_investment))
+        capital = float(np.sum(self.eval_env.market.Kt))
+        target_capital = float(np.sum(self.eval_env.bank.target_capital))
+        tolerance = 1e-8 * max(gdp, 1.0)
+
+        return {
+            "period": period,
+            "real_gdp": gdp,
+            "real_gdp_index": 100.0 * gdp / max(float(initial_gdp), 1e-8),
+            "gdp_growth": gdp / max(float(previous_gdp), 1e-8) - 1.0,
+            "price_index": float(self.eval_env.price_index),
+            "inflation_rate": float(self.eval_env.inflation_rate),
+            "consumption_gdp": consumption / max(gdp, 1e-8),
+            "investment_gdp": investment / max(gdp, 1e-8),
+            "government_gdp": government / max(gdp, 1e-8),
+            "unused_output_gdp": max(gdp - consumption - government - investment, 0.0)
+            / max(gdp, 1e-8),
+            "expected_inflation_used": float(expected_inflation),
+            "lending_rate": float(self.eval_env.bank.lending_rate),
+            "real_lending_rate": float(self.eval_env.bank.real_lending_rate),
+            "capital_user_cost": float(self.eval_env.bank.capital_user_cost),
+            "capital_target_ratio": target_capital / max(capital, 1e-8),
+            "desired_investment_gdp": desired / max(gdp, 1e-8),
+            "financed_investment_gdp": financed / max(gdp, 1e-8),
+            "user_cost_at_floor": False,  # Legacy field: the artificial floor was removed.
+            "nonpositive_user_cost": self.eval_env.bank.capital_user_cost <= 0,
+            "bank_balance_sheet_residual": getattr(self.eval_env.bank, "balance_sheet_residual", None),
+            "firm_loan_balance": float(self.eval_env.bank.capital_loan),
+            "firm_cash": getattr(self.eval_env.bank, "firm_deposits", None),
+            "accounting_failure": self.eval_env.bank.accounting_failure,
+            "termination_reason": self.eval_env.termination_reason,
+            "credit_binding": financed < desired - tolerance,
+            "goods_binding": investment < financed - tolerance,
+        }
 
     def viz_data(self, house_model_path, government_model_path):
         self.house_agent.load(dir_path=house_model_path)
@@ -330,6 +434,14 @@ class Runner:
             "house_age": self.eval_env.households.age,
             "deposit_rate": self.eval_env.bank.deposit_rate,
             "lending_rate": self.eval_env.bank.lending_rate,
+            "real_lending_rate": self.eval_env.bank.real_lending_rate,
+            "capital_user_cost": self.eval_env.bank.capital_user_cost,
+            "capital_marginal_revenue_product": self.eval_env.market.capital_marginal_revenue_product,
+            "target_capital": self.eval_env.bank.target_capital,
+            "desired_fixed_investment": self.eval_env.bank.desired_fixed_investment,
+            "financed_fixed_investment": self.eval_env.bank.financed_fixed_investment,
+            "actual_fixed_investment": self.eval_env.bank.actual_fixed_investment,
+            "available_investment_credit": self.eval_env.bank.available_investment_credit,
         }
 
         if 'central_bank' in self.eval_env.government:
@@ -344,8 +456,8 @@ class Runner:
             self.econ_dict['retire_age'] = pension.retire_age
             self.econ_dict['contribution_rate'] = pension.contribution_rate
             self.econ_dict['pension_fund'] = pension.pension_fund
-            self.econ_dict['old_percent'] = pension.old_percent
-            self.econ_dict['dependency_ratio'] = pension.dependency_ratio
+            self.econ_dict['old_percent'] = self.eval_env.households.old_percent
+            self.econ_dict['dependency_ratio'] = self.eval_env.households.dependency_ratio
 
     def sum_non_uniform_dict(self, sequences):
         total_sum = 0
@@ -367,7 +479,11 @@ class Runner:
                      "house_reward", "social_welfare", "per_gdp", "income_gini", "firm_production",
                      "wealth_gini", "years", "GDP", "nominal_GDP", "gov_spending", "house_total_tax", "house_income_tax",
                      "house_wealth_tax", "house_wealth", "house_income", "house_consumption", "house_pension",
-                     "house_work_hours", "total_labor", "WageRate", "price", "house_age", "firm_reward", "bank_reward", "deposit_rate", "lending_rate"]
+                     "house_work_hours", "total_labor", "WageRate", "price", "house_age", "firm_reward", "bank_reward",
+                     "deposit_rate", "lending_rate", "real_lending_rate", "capital_user_cost",
+                     "capital_marginal_revenue_product", "target_capital",
+                     "desired_fixed_investment", "financed_fixed_investment", "actual_fixed_investment",
+                     "available_investment_credit"]
 
         if 'pension' in self.eval_env.government:
             eval_econ += [
@@ -383,20 +499,32 @@ class Runner:
             ]
         episode_econ_dict = dict(zip(eval_econ, [[] for i in range(len(eval_econ))]))
         # final_econ_dict = dict(zip(eval_econ, [None for i in range(len(eval_econ))]))
-        final_econ_dict, episode_results = {}, []
+        final_econ_dict, episode_results, trajectories, trajectory_summaries = {}, [], [], []
 
         for epoch_i in range(self.args.eval_episodes):
             obs_dict = self.eval_env.reset()
             self.reset_agent_episodes()
             eval_econ_dict = dict(zip(eval_econ, [[] for i in range(len(eval_econ))]))
+            episode_trajectory = []
+            initial_gdp = float(self.eval_env.main_gov.initial_GDP)
+            previous_gdp = initial_gdp
             t = 0
             while True:
                 with torch.no_grad():
                     obs_dict_tensor = self._get_tensor_inputs(obs_dict)
                     action_dict, processed_actions_dict = self.agents_get_action(obs_dict_tensor)
+                    expected_inflation = float(self.eval_env.expected_inflation)
                     next_obs_dict, rewards_dict, done = self.eval_env.step(processed_actions_dict, t)
                 t += 1
                 self.init_economic_dict(rewards_dict)
+                snapshot = self.economic_snapshot(
+                    period=t,
+                    initial_gdp=initial_gdp,
+                    previous_gdp=previous_gdp,
+                    expected_inflation=expected_inflation,
+                )
+                episode_trajectory.append(snapshot)
+                previous_gdp = snapshot["real_gdp"]
 
                 for each in eval_econ:
                     if "house_" in each or each == "WageRate":
@@ -409,8 +537,12 @@ class Runner:
                     break
 
             for key, value in eval_econ_dict.items():
-                if key in {"gov_reward", "GDP", "nominal_GDP", "bank_reward", "firm_reward"}:
+                if key in {"gov_reward", "bank_reward", "firm_reward"}:
                     episode_econ_dict[key].append(np.sum(value, axis=0))
+                elif key in {"GDP", "nominal_GDP"}:
+                    # GDP is a per-period flow. Keep the final-period level here;
+                    # cumulative and mean GDP are reported under explicit names below.
+                    episode_econ_dict[key].append(value[-1])
                 elif key == "price" or key == "WageRate" or key == "firm_production":
                     episode_econ_dict[key].append(np.mean(value, axis=0))
                 elif key == "years":
@@ -424,9 +556,14 @@ class Runner:
                 else:
                     episode_econ_dict[key].append(np.mean(value))
 
+            trajectory_summary = summarize_trajectory(episode_trajectory)
+            trajectory_summaries.append(trajectory_summary)
+            trajectories.append(episode_trajectory)
             episode_results.append({
                 "episode": epoch_i + 1,
+                "termination_reason": self.eval_env.termination_reason,
                 **{key: clean_metric(episode_econ_dict[key][-1]) for key in episode_econ_dict},
+                **trajectory_summary,
             })
 
         for key, value in episode_econ_dict.items():
@@ -436,6 +573,9 @@ class Runner:
                     final_econ_dict[f"{key}_{i}"] = np.mean(value[:, i])
             else:
                 final_econ_dict[key] = np.mean(value)
+
+        for key in trajectory_summaries[0]:
+            final_econ_dict[key] = float(np.mean([summary[key] for summary in trajectory_summaries]))
 
         if int(self.econ_dict['years']) > int(self.eva_year_indicator):
             write_evaluate_data = True
@@ -460,5 +600,9 @@ class Runner:
             print("============= Finish Writing================")
 
         if return_episodes:
-            return {"episodes": episode_results, "aggregate": final_econ_dict}
+            return {
+                "episodes": episode_results,
+                "aggregate": final_econ_dict,
+                "trajectories": trajectories,
+            }
         return final_econ_dict

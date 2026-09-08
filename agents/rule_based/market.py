@@ -7,7 +7,8 @@ class MarketRules:
     """
     
     @staticmethod
-    def get_action(type,obs, action_dim):
+    def get_action(type, obs, action_dim, alpha=0.36,
+                   depreciation_rate=0.06, markup=1.0):
         """
         Generate actions for the firms based on the market type and observations.
         Each market type will have different rules for setting prices and wage rates.
@@ -23,56 +24,41 @@ class MarketRules:
         if type == "perfect":
             return np.random.randn(firm_n, action_dim)   # Firms in perfect competition have no pricing power.
         
-        elif type == "monopoly":
-            return MarketRules._monopoly(firm_n, action_dim, obs)
-        
-        elif type == "oligopoly":
-            return MarketRules._oligopoly(firm_n, action_dim, obs)
-        
-        elif type == "monopolistic_competition":
-            return MarketRules._monopolistic_competition(firm_n, action_dim, obs)
+        elif type in {"monopoly", "oligopoly", "monopolistic_competition"}:
+            return MarketRules._cost_based_action(
+                obs,
+                alpha=alpha,
+                depreciation_rate=depreciation_rate,
+                markup=markup,
+            )
         else:
             raise ValueError("Unsupported market type.")
     
 
     
     @staticmethod
-    def _monopoly(firm_n, action_dim, obs):
-        """
-        Market type: Monopoly.
-        A single firm controls the market. It maximizes profit by adjusting price and wage rate.
-        """
-        firm_productivity = obs[:, 1].item()
-        
-        # Monopoly will set prices high to maximize profit, and adjust wages based on productivity.
-        price = np.full((firm_n, 1),firm_productivity * 2)  # Set price based on productivity (doubled for profit margin)
-        wage_rate = np.full((firm_n, 1), firm_productivity * 0.5)  # Wages set as a fraction of productivity
-        return np.hstack([price, wage_rate])
-    
-    @staticmethod
-    def _oligopoly(firm_n, action_dim, obs):
-        """
-        Market type: Oligopoly.
-        A few firms dominate the market. They set prices and wages considering competition.
-        """
-        firm_productivity = obs[:, 1]
-        
-        # Oligopoly firms set prices considering competition but also maximize profit
-        price = firm_productivity.reshape(-1, 1) * np.random.uniform(1.2, 1.5, (firm_n, 1))  # Price is influenced by productivity and competition
-        wage_rate = firm_productivity.reshape(-1, 1) * np.random.uniform(0.6, 0.9, (firm_n, 1))  # Wage rate depends on competition level
-        return np.hstack([price, wage_rate])
-    
-    @staticmethod
-    def _monopolistic_competition(firm_n, action_dim, obs):
-        """
-        Market type: Monopolistic competition.
-        Many firms exist, each offering differentiated products. Firms adjust prices based on their market position.
-        """
-        firm_productivity = obs[:, 1]
-        
-        # In monopolistic competition, firms set prices based on their product differentiation.
-        price = firm_productivity.reshape(-1, 1) * np.random.uniform(1.1, 1.3, (firm_n, 1))  # Price slightly above the market average
-        wage_rate = firm_productivity.reshape(-1, 1) * np.random.uniform(0.7, 1.0, (firm_n, 1))  # Wages based on product differentiation
-        return np.hstack([price, wage_rate])
-    
+    def _cost_based_action(obs, alpha, depreciation_rate, markup):
+        """Use Cobb-Douglas unit cost for price and labor's marginal product for wage.
 
+        Observation columns are [K, Z, loan rate, L, previous price,
+        previous wage]. Markup is explicit and can be calibrated by market type.
+        """
+        obs = np.asarray(obs, dtype=float)
+        capital = np.clip(obs[:, 0:1], 1e-8, None)
+        productivity = np.clip(obs[:, 1:2], 1e-8, None)
+        rental_rate = np.clip(obs[:, 2:3] + depreciation_rate, 1e-8, None)
+        labor = np.clip(obs[:, 3:4], 1e-8, None)
+        previous_wage = np.clip(obs[:, 5:6], 1e-8, None)
+
+        marginal_cost = (
+            np.power(rental_rate / alpha, alpha)
+            * np.power(previous_wage / (1 - alpha), 1 - alpha)
+            / productivity
+        )
+        price = float(markup) * marginal_cost
+        marginal_product_labor = (
+            (1 - alpha) * productivity * np.power(capital / labor, alpha)
+        )
+        wage_rate = price * marginal_product_labor
+        return np.hstack([price, wage_rate])
+    

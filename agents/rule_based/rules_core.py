@@ -36,11 +36,27 @@ class rule_agent:
 
         if name == "households":
             action_dim = self.envs.households.action_dim
-            return HouseholdRules.get_action(type=self.agent_type, obs=obs_tensor, action_dim=action_dim, firm_n=firm_n)
+            country = getattr(self.args, "household_country", "China")
+            return HouseholdRules.get_action(
+                type=self.agent_type, obs=obs_tensor, action_dim=action_dim,
+                firm_n=firm_n, country=country,
+                rule=getattr(self.args, "household_rule", "age_profile"),
+                consumption_share=getattr(self.args, "household_consumption_share", 0.95),
+                labor_rule=getattr(self.args, "household_labor_rule", "initial"),
+                initial_work=self.envs.households.work_init,
+                labor_share=getattr(self.args, "household_labor_share", 0.5),
+            )
 
         if name == "market":
             action_dim = self.envs.market.action_dim
-            return MarketRules.get_action(type=self.agent_type, obs=obs_tensor, action_dim=action_dim)
+            return MarketRules.get_action(
+                type=self.agent_type,
+                obs=obs_tensor,
+                action_dim=action_dim,
+                alpha=self.envs.market.alpha,
+                depreciation_rate=self.envs.bank.depreciation_rate,
+                markup=self.envs.market.markup,
+            )
 
         if name == "bank":
             action_dim = self.envs.bank.action_dim

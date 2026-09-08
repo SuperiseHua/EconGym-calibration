@@ -1,11 +1,17 @@
 Environment:
   env_core:
     problem_scene: "real_society"
+    episode_length: 27  # 实际仿真/评估期限；epoch_length 仅控制训练采样步数
+    estate_tax_exemption: 12060000  # 2022 U.S. federal basic exclusion amount (USD)
   Entities:
     - entity_name: 'government'
       entity_args:
         params:
           type: "tax"  # Focus on pension policy. type_list: ['tax', 'pension', 'central_bank']
+          Gt_prob: 0.171  # 2022 government consumption and gross investment / GDP
+        tax:
+          initial_action:
+            Gt_prob: 0.171
     - entity_name: 'households'
       entity_args:
         params:
@@ -26,19 +32,24 @@ Environment:
         params:
           type: 'non_profit'   # [ 'non_profit', 'commercial' ]
           n: 1
-          lending_rate: 0.0345
-          deposit_rate: 0.0345
-          reserve_ratio: 0.1
-          base_interest_rate: 0.0345
+          lending_rate: 0.01683
+          deposit_rate: 0.01683
+          reserve_ratio: 0.0
+          base_interest_rate: 0.01683  # 2022 monthly effective federal funds rate average
           depreciation_rate: 0.06
+          firm_accounting: true
 
 Trainer:
-  house_alg: "bc"
+  test: true  # 固定规则直接评估，不进入无参数可训练的循环
+  house_alg: "rule_based"
+  household_rule: fixed_consumption
+  household_consumption_share: 0.95 # 自定义总消费比例；不再通过环境覆盖 BC 输出
+  household_labor_rule: scf       # 保留原最近邻劳动行为；initial / constant 可切换
+  household_country: US          # 仅在 age_profile 规则下选择国家先验
   gov_alg: "us_federal"
   firm_alg: "rule_based"
   bank_alg: "rule_based"
   seed: 2
-  epoch_length: 300
+  epoch_length: 27
   cuda: False
 #  n_epochs: 10
-

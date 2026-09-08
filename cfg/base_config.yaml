@@ -9,6 +9,8 @@ Environment:                       # Parameters for the environment
     screen: False                  # Whether to render the environment (currently unavailable)
     episode_length: 300            # Number of steps in one episode
     step_cnt: 0                    # Initial step counter
+    price_adjustment_speed: 0.2    # Temporary price adjustment speed; calibrate with country-year data later
+    inflation_expectation_lambda: 0.5 # Weight on last realized inflation in adaptive expectations
 
   Entities:
     - entity_name: 'government'    # Government agent parameters
@@ -28,9 +30,13 @@ Environment:                       # Parameters for the environment
           reserve_ratio: 0.08      # Central bank reserve requirement ratio
           gov_task: "gdp"          # Optimization objective ("gdp", "gini", "social_welfare", "mean_welfare", "gdp_gini", "pension_gap"). For central bank: inflation stabilization.
           tax_type: "ai_agent"     # Tax agent type ("ai_agent", "us_federal", "saez")
-          real_gdp: 254746e8       # Initial real GDP (USD)
+          # Static data vintage: United States, 2022. GDP is current-dollar annual GDP and
+          # is used as the base-year scale with the initial price normalized to one.
+          # All current household agents represent SCF family/primary economic units.
+          # TODO(data-channel): replace these values with an uploaded country-year data source.
+          real_gdp: 254746e8       # 2022 U.S. current-dollar GDP (USD)
           real_debt_rate: 1.2129   # Initial government debt-to-GDP ratio
-          real_population: 333428e3 # Initial population size
+          real_population: 333428e3 # 2022 U.S. population; retained for demographic statistics
 
         tax:
           type: "tax"              # Fiscal authority agent executing tax policy
@@ -82,6 +88,8 @@ Environment:                       # Parameters for the environment
           type: 'ramsey'                # Household type ('ramsey', 'OLG', 'OLG_risk_invest', 'ramsey_risk_invest')
           type_list: [ 'ramsey', 'OLG', 'OLG_risk_invest', 'ramsey_risk_invest' ]  # Supported household models
           households_n: 100             # Number of households
+          initial_savings_column: ASSET # Model assumption: all initial household assets are deposited; not observed SCF deposits
+          freeze_labor_efficiency: false # 环境开关：冻结效率演化；消费和工时由策略决定
           CRRA: 1                       # Coefficient of relative risk aversion
           IFE: 1                        # Inverse Frisch elasticity
           stock_alpha: 0.1              # Sensitivity coefficient: controls stock price response to buy/sell imbalance
@@ -91,6 +99,7 @@ Environment:                       # Parameters for the environment
           rho_e: 0.982                  # Persistence in state transitions (normal/superstar)
           sigma_e: 0.200                # Volatility of standard normal shocks
           super_e: 504.3                # Labor productivity in superstar state
+          education_efficiency_beta: 0.164 # Provisional education-efficiency slope; calibrate later
           at_min: -1e6                  # Minimum asset holdings
           h_max: 2512                   # Maximum annual working hours
           real_action_max: [ 1.0, 1.0 ]   # Max values for (savings share of income, labor share of h_max)
@@ -109,8 +118,9 @@ Environment:                       # Parameters for the environment
           type: "perfect"               # Market type: 'perfect', 'monopoly', 'monopolistic_competition', 'oligopoly'
           type_list: [ 'perfect', 'monopoly', 'monopolistic_competition', 'oligopoly' ] # Supported market types
           alpha: 0.36                   # Capital share in Cobb-Douglas production
-          Z: 1.0                        # Initial productivity level
-          sigma_z: 0.0038               # Std. deviation of productivity shocks
+          initial_capital_output_ratio: null # null retains wealth-minus-government-debt initialization
+          # Initial productivity Z_0 is inferred from base-year GDP, capital, and labor.
+          sigma_z: 0.0038               # Maximum per-period log-productivity growth shock; innovation is U(0,1)
           epsilon: 0.5                  # Demand elasticity parameter in CES utility
           real_action_max: [ 1e2, 1e2 ]   # Max values for firm actions (price, wage rate)
           real_action_min: [ 0.0001, 0.0001 ] # Min values for firm actions
@@ -126,6 +136,7 @@ Environment:                       # Parameters for the environment
           initial_action: null
         monopoly:
           type: "monopoly"              # Monopoly market
+          markup: 1.25                   # Provisional price/marginal-cost markup; calibrate by market
           action_dim: 2                 # Firm sets price and wage rate
           firm_n: 1                     # One monopolist
           action_space:
@@ -137,6 +148,7 @@ Environment:                       # Parameters for the environment
             WageRate: 1                 # Initial wage rate
         monopolistic_competition:
           type: "monopolistic_competition" # Monopolistic competition
+          markup: 1.10                   # Provisional price/marginal-cost markup; calibrate by market
           action_dim: 2
           firm_n: 10                    # Number of firms (user-defined)
           action_space:
@@ -148,6 +160,7 @@ Environment:                       # Parameters for the environment
             WageRate: 1
         oligopoly:
           type: "oligopoly"             # Oligopoly market
+          markup: 1.15                   # Provisional price/marginal-cost markup; calibrate by market
           action_dim: 2
           firm_n: 2                     # Number of firms (user-defined)
           action_space:
@@ -169,6 +182,10 @@ Environment:                       # Parameters for the environment
           reserve_ratio: 0.1            # Reserve requirement ratio
           base_interest_rate: 0.0345    # Base policy interest rate
           depreciation_rate: 0.06       # Capital depreciation rate
+          capital_adjustment_speed: 0.2 # Annual fraction of net capital gap closed; provisional
+          max_net_capital_growth: 0.05  # Annual capacity bound, not realized growth; provisional
+          firm_accounting: false       # Enable shared firm-bank ledger in supported Ramsey baseline
+          principal_repayment_rate: 0.05 # Scheduled fraction of opening loans; unpaid principal rolls over
           real_action_max: [ 0.2, 0.1 ]   # Max values for (loan rate, deposit rate)
           real_action_min: [ 0.03, -0.001 ] # Min values for (loan rate, deposit rate)
           action_space:
@@ -216,6 +233,11 @@ Trainer:                                # Store parameters related to policy tra
   epsilon: 0.1                          # Epsilon-greedy exploration rate
   save_interval: 10                     # Model save interval
   house_alg: "bc"                       # Household agent algorithm
+  # 以下仅在 house_alg: rule_based 时生效；策略代码位于 agents/rule_based/households.py。
+  household_rule: age_profile           # fixed_consumption：自定义总消费比例；age_profile：旧年龄/国家抽样规则
+  household_consumption_share: 0.95     # fixed_consumption 专用：含税消费预算/税后收入；0.95 即 95%
+  household_labor_rule: initial          # fixed_consumption 专用：initial=各自初始劳动；constant=统一比例；scf=最近邻 LF
+  household_labor_share: 0.5             # labor_rule: constant 专用：工时/h_max
   gov_alg: "rule_based"                 # Government agent algorithm
   firm_alg: "rule_based"                # Firm agent algorithm
   bank_alg: "rule_based"                # Bank agent algorithm

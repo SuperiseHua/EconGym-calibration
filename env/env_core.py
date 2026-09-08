@@ -14,7 +14,6 @@ class EconomicSociety:
     def __init__(self, cfg):
         super().__init__()
         self.__dict__.update(cfg['env_core'])  # update cfg to self
-        self.__dict__.update(cfg['env_core'])  # update cfg to self
         self.agents = {'households': None, 'government': {}, 'market': None, 'bank': None}
 
         for entity_arg in cfg['Entities']:
@@ -37,8 +36,12 @@ class EconomicSociety:
         self.market = self.agents['market']
         self.bank = self.agents['bank']
         
-        main_key = next(iter(self.government))
-        self.main_gov = self.government[main_key]
+        self.fiscal_gov = (
+            self.government.get('tax')
+            or self.government.get('pension')
+            or self.government.get('central_bank')
+        )
+        self.main_gov = self.fiscal_gov  # Backward-compatible alias.
         
         observations_dict = self.reset()
 
@@ -59,6 +62,53 @@ class EconomicSociety:
             self.expand_action_space(firm_n=self.market.firm_n)
         
         self.display_mode = False
+        # Capture only after spaces and initial actions have their final dimensions.
+        self.reset()
+        self._initial_state = self._capture_initial_state()
+
+    def _entity_records(self):
+        return {
+            'households': self.households, 'market': self.market, 'bank': self.bank,
+            **{f'government.{name}': gov for name, gov in self.government.items()},
+        }
+
+    _entity_reference_names = (
+        'agents', 'households', 'market', 'bank', 'government', 'fiscal_gov', 'main_gov',
+    )
+
+    def _capture_initial_state(self):
+        return copy.deepcopy({
+            'environment': {key: value for key, value in self.__dict__.items()
+                            if key not in self._entity_reference_names and key != '_initial_state'},
+            'entities': {name: entity.__dict__ for name, entity in self._entity_records().items()},
+        })
+
+    def _restore_initial_state(self):
+        # Preserve entity identities: policies may hold references to these objects.
+        initial_state = self._initial_state
+        references = {name: getattr(self, name) for name in self._entity_reference_names}
+        restored = copy.deepcopy(initial_state)
+        for name, entity in self._entity_records().items():
+            entity.__dict__.clear()
+            entity.__dict__.update(restored['entities'][name])
+        self.__dict__.clear()
+        self.__dict__.update(restored['environment'])
+        self.__dict__.update(references)
+        self._initial_state = initial_state
+
+    def set_tax_type(self, tax_type):
+        """Persist an explicitly selected fiscal algorithm across episode resets."""
+        from agents.saez import SaezGovernment
+        gov = self.government['tax']
+        gov.tax_type = tax_type
+        initial_gov = self._initial_state['entities']['government.tax']
+        initial_gov['tax_type'] = tax_type
+        if tax_type == 'saez':
+            gov.saez_gov = SaezGovernment()
+            initial_gov['saez_gov'] = copy.deepcopy(gov.saez_gov)
+        else:
+            gov.__dict__.pop('saez_gov', None)
+            initial_gov.pop('saez_gov', None)
 
     def expand_action_space(self, firm_n):
         '''
@@ -81,14 +131,14 @@ class EconomicSociety:
         new_shape = (N, self.households.action_dim)
         
         # Update action space for households
-        action_max = float(self.households.action_space.high_repr)
-        action_min = float(self.households.action_space.low_repr)
+        action_max = float(self.households.action_space.high.max())
+        action_min = float(self.households.action_space.low.min())
         self.households.action_space = Box(low=action_min, high=action_max, shape=new_shape, dtype=np.float32)
     
         # For fiscal government (type="tax"), expand the action space to include spending proportions for each firm
         if "tax" in self.government:
-            action_max = float(self.government['tax'].action_space.high_repr)
-            action_min = float(self.government['tax'].action_space.low_repr)
+            action_max = float(self.government['tax'].action_space.high.max())
+            action_min = float(self.government['tax'].action_space.low.min())
             self.government['tax'].action_dim += firm_n
             self.government['tax'].action_space = Box(low=action_min, high=action_max, shape=(self.government['tax'].action_dim,),
                                                       dtype=np.float32)
@@ -149,13 +199,20 @@ class EconomicSociety:
         """
         
         expected_dim = agent.action_dim
-        current_action_dim = getattr(agent_action, 'shape', (0,))[-1]
+        current_shape = getattr(agent_action, 'shape', (0,))
+        current_action_dim = current_shape[-1]
         
         if current_action_dim == 0 and expected_dim == 0:
             return None
         elif current_action_dim != expected_dim:
             raise ValueError(
                 f"Invalid actions for {agent_name}. Expected shape: {expected_dim}, Found: {current_action_dim}"
+            )
+
+        expected_shape = getattr(agent.action_space, 'shape', None)
+        if expected_shape is not None and tuple(current_shape) != tuple(expected_shape):
+            raise ValueError(
+                f"Invalid actions for {agent_name}. Expected shape: {expected_shape}, Found: {current_shape}"
             )
     
         expected_action_min = agent.real_action_min
@@ -178,21 +235,34 @@ class EconomicSociety:
             for gov_type, gov_agent in self.government.items():
                 gov_agent.get_action(processed_action_dict[self.government[gov_type].name][gov_type], firm_n=self.market.firm_n)
 
+        if "central_bank" in self.government:
+            central_bank = self.government["central_bank"]
+            self.bank.base_interest_rate = central_bank.base_interest_rate
+            self.bank.reserve_ratio = central_bank.reserve_ratio
         self.bank.get_action(processed_action_dict[self.bank.name], central_bank_exist=("central_bank" in self.government))
         self.market.get_action(processed_action_dict[self.market.name])
-        self.households.get_action(processed_action_dict[self.households.name], firm_n=self.market.firm_n)
+        self.households.get_action(
+            processed_action_dict[self.households.name],
+            firm_n=self.market.firm_n,
+            update_efficiency=self.step_cnt > 0,
+        )
 
     def step(self, action_dict, t=None):
         """Perform a simulation step given the actions."""
     
         # === Phase 1: Agents Take Action ===
         self.get_actions(action_dict)
+        self.bank.prepare_settlement(self)
+        if "OLG" in self.households.type:
+            self.households.update_retirement_status(self.main_gov.retire_age)
     
         # === Phase 2: Entities Step Forward ===
         self.market.step(self)
+        # No inventory carry-over: only current production can be traded this period.
+        self.market.goods_supply = self.market.Yt_j
+        self.main_gov.plan_spending(self)
         self.households.step(self, t)
-        for _, gov_agent in self.government.items():
-            gov_agent.step(self)
+        self.update_governments()
         self.bank.step(self)
     
         # === Phase 3: Update Environment State ===
@@ -200,8 +270,23 @@ class EconomicSociety:
 
         if self.market.type == "perfect":
             # Current planned demand determines the next year's competitive-market price.
-            planned_demand = self.households.planned_consumption_demand + self.main_gov.gov_spending
-            self.market.update_price(planned_demand, self.market.Yt_j)
+            self.market.planned_demand = (
+                self.households.planned_consumption_demand
+                + self.main_gov.gov_spending_d
+                + self.bank.financed_fixed_investment
+            )
+            demand, supply = self.market.planned_demand, self.market.goods_supply
+            if (np.any(supply == 0) and np.all(np.isfinite(supply))
+                    and np.all(supply >= 0) and np.all(np.isfinite(demand))
+                    and np.all(demand >= 0)):
+                # Settlement is complete, but D/S cannot define a next-period price.
+                # Keep actual zero output and this period's transaction price.
+                self.termination_reason = 'zero_goods_supply'
+            else:
+                self.market.update_price(
+                    demand, supply,
+                    adjustment_speed=getattr(self, "price_adjustment_speed", 0.2),
+                )
         self.step_cnt += 1
         self.done = self.is_terminal()
     
@@ -218,6 +303,22 @@ class EconomicSociety:
             self.done,
         )
 
+    def update_governments(self):
+        """Update the shared fiscal ledger once and synchronize other policy authorities."""
+        self.fiscal_gov.step(self)
+        for gov_agent in self.government.values():
+            if gov_agent is self.fiscal_gov:
+                continue
+            gov_agent.old_GDP = copy.copy(gov_agent.GDP)
+            gov_agent.GDP = copy.copy(self.fiscal_gov.GDP)
+            gov_agent.real_GDP = copy.copy(self.fiscal_gov.real_GDP)
+            gov_agent.nominal_GDP = copy.copy(self.fiscal_gov.nominal_GDP)
+            gov_agent.per_household_gdp = copy.copy(self.fiscal_gov.per_household_gdp)
+            gov_agent.Bt = copy.copy(self.fiscal_gov.Bt)
+            gov_agent.Bt_next = copy.copy(self.fiscal_gov.Bt_next)
+            if gov_agent.type == 'pension' and 'OLG' in self.households.type:
+                gov_agent.pension_step(self)
+
     def update_metrics(self):
         """Update evaluation metrics such as Gini coefficients, price index, and rewards."""
         # Compute Gini coefficients
@@ -231,11 +332,17 @@ class EconomicSociety:
             self.consumer_prices, self.consumption_quantities,
             self.last_prices, self.last_consumption, self.price_index,
         )
+        self.expected_inflation = self.update_expected_inflation(
+            self.inflation_rate,
+            self.expected_inflation,
+            self.inflation_expectation_lambda,
+        )
         
-        market_supply = self.market.Yt_j
-        market_demand = self.households.final_consumption.sum(axis=0)[:, np.newaxis] + self.main_gov.gov_spending
-        
-        self.real_deals = np.minimum(market_supply, market_demand)
+        self.real_deals = (
+            self.households.final_consumption.sum(axis=0)[:, np.newaxis]
+            + self.main_gov.gov_spending
+            + self.bank.actual_fixed_investment
+        )
         
         households_reward = self.households.get_reward()
         
@@ -255,29 +362,74 @@ class EconomicSociety:
             self.market.name: firm_reward,
             self.bank.name: bank_reward,
         }
+
+    @staticmethod
+    def update_expected_inflation(realized_inflation, previous_expectation, weight):
+        """Form next-period expectations from last inflation and prior expectations."""
+        weight = float(weight)
+        if not 0.0 <= weight <= 1.0:
+            raise ValueError("inflation_expectation_lambda must be in [0, 1].")
+        return weight * float(realized_inflation) + (1.0 - weight) * float(previous_expectation)
         
     def reset(self, **custom_cfg):
-        """Reset the simulation to the initial state."""
+        """Restore this configuration's initial sample; optional seed controls shocks.
+
+        Create a new environment for a different calibration configuration. Reset
+        clears all episode state, including attributes first created during step.
+        """
+        if 'seed' in custom_cfg:
+            np.random.seed(custom_cfg['seed'])
+        if hasattr(self, '_initial_state'):
+            self._restore_initial_state()
+            return EconObservations(self).get_obs()
         self.step_cnt = 0
-        for _, gov_agent in self.government.items():
-            gov_agent.reset(households_n=self.households.households_n, firm_n=self.market.firm_n)
-        
+        # Restore the population before scaling fiscal aggregates (OLG changes N).
         self.households.reset()
-        self.bank.reset(households_at=self.households.at)
+        for _, gov_agent in self.government.items():
+            gov_agent.reset(
+                households_n=self.households.households_n,
+                firm_n=self.market.firm_n,
+                household_type=self.households.type,
+                real_household_units=self.households.real_unit_count,
+            )
+        
+        if "OLG" in self.households.type:
+            self.households.update_retirement_status(self.main_gov.retire_age)
+        self.bank.reset(
+            household_savings=self.households.savings,
+            government_bonds=self.main_gov.Bt,
+            government_bond_rate=(self.government['central_bank'].base_interest_rate
+                                  if 'central_bank' in self.government
+                                  else self.bank.entity_args.params.base_interest_rate),
+        )
         if "central_bank" in self.government:
             central_bank = self.government["central_bank"]
             self.bank.base_interest_rate = central_bank.base_interest_rate
             self.bank.reserve_ratio = central_bank.reserve_ratio
 
-        self.market.reset(households_n=self.households.households_n, GDP=gov_agent.GDP,
-                          households_at=self.households.at, real_debt_rate=gov_agent.real_debt_rate)
+        self.market.reset(
+            GDP=self.main_gov.GDP,
+            scale_factor=self.main_gov.scale_factor,
+            households_at=self.households.at,
+            real_debt_rate=self.main_gov.real_debt_rate,
+        )
+        self.households.align_initial_effective_labor(self.market.Lt)
+        self.bank.initialize_firm_accounts(self)
 
         self.price_index = 100.0
+        self.inflation_rate = 0.02
+        self.expected_inflation = self.inflation_rate
+        self.inflation_expectation_lambda = float(
+            getattr(self, "inflation_expectation_lambda", 0.5)
+        )
+        if not 0.0 <= self.inflation_expectation_lambda <= 1.0:
+            raise ValueError("inflation_expectation_lambda must be in [0, 1].")
         self.last_prices = self.market.price * (1 + self.consumption_tax_rate)
         self.last_consumption = None
         self.ini_income_gini = self.gini_coef(self.households.income)
         self.ini_wealth_gini = self.gini_coef(self.households.at)
         self.done = False
+        self.termination_reason = None
         self.display_mode = False
 
         return EconObservations(self).get_obs()
@@ -296,7 +448,8 @@ class EconomicSociety:
         #     print(self.recursive_decompose_dict(self.agents, lambda a: a.is_terminal()))
         #     print(1)
         
-        return gini_invalid or data_nan or episode_completed or agent_terminal
+        return (self.termination_reason is not None or gini_invalid or data_nan
+                or episode_completed or agent_terminal)
 
     def recursive_decompose_dict(self, input_dict, func):
         
@@ -325,23 +478,23 @@ class EconomicSociety:
                 "Invalid actions. Expected agents: {}, Received agents: {}".format(expected_agents, received_agents))
 
     def gini_coef(self, values):
-        """Fast Gini coefficient computation for 1D or column vector values."""
-        
-        if self.households.households_n == 0:  # empty array check
-            return 0.
-        
-        if values.ndim == 2 and values.shape[1] == 1:
-            values = values.flatten()
-
-        values = np.sort(values + 1e-7)  # Avoid division by zero
-        values = values / np.max(values)
+        """Finite-sample normalized Gini supporting negative income or wealth."""
+        values = np.asarray(values, dtype=float).reshape(-1)
         n = values.size
-        cum_weights = np.arange(1, n + 1)
+        if n <= 1:
+            return 0.
+        if not np.all(np.isfinite(values)):
+            return np.nan
 
-        numerator = np.dot(cum_weights, values)
-        denominator = np.sum(values)
+        absolute_total = np.sum(np.abs(values))
+        if np.isclose(absolute_total, 0.0):
+            return 0.
 
-        return (2 * numerator - (n + 1) * denominator) / (n * denominator)
+        values = np.sort(values)
+        ranks = np.arange(1, n + 1)
+        pairwise_difference_sum = np.dot(2 * ranks - n - 1, values)
+        gini = pairwise_difference_sum / ((n - 1) * absolute_total)
+        return float(np.clip(gini, 0.0, 1.0))
 
 
     def render(self):
