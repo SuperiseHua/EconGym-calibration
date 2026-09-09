@@ -1,0 +1,1057 @@
+{
+  "evidence_level": "development_diagnostics_no_optimization",
+  "old_mae_diagnostic_reports": {
+    "uncalibrated": {
+      "mean_path_macro_mae_status": "FAIL",
+      "per_seed_all_axes_pass_fraction": 0.0,
+      "original_search_decision": "not_a_search",
+      "taskbook_acceptance": "NOT_EVALUATED"
+    },
+    "blockwise": {
+      "mean_path_macro_mae_status": "PASS",
+      "per_seed_all_axes_pass_fraction": 0.3333333333333333,
+      "original_search_decision": "validation_failed",
+      "taskbook_acceptance": "NOT_EVALUATED"
+    },
+    "random": {
+      "mean_path_macro_mae_status": "FAIL",
+      "per_seed_all_axes_pass_fraction": 0.0,
+      "original_search_decision": "validation_failed",
+      "taskbook_acceptance": "NOT_EVALUATED"
+    },
+    "known_parameter": {
+      "mean_path_macro_mae_status": "FAIL",
+      "per_seed_all_axes_pass_fraction": 0.3333333333333333,
+      "original_search_decision": "not_a_search",
+      "taskbook_acceptance": "NOT_EVALUATED"
+    }
+  },
+  "cases": {
+    "baseline": {
+      "valid": true,
+      "diagnostic_rows": 12,
+      "diagnostic_status_counts": {
+        "PASS": 12,
+        "FAIL": 0,
+        "UNAVAILABLE": 0
+      },
+      "binding_counts_all_periods": {
+        "target_cap_active": 12,
+        "investment_zero_floor_active": 0,
+        "investment_growth_cap_active": 12,
+        "credit_rationing_material": 0,
+        "goods_rationing_material": 12
+      },
+      "macro_mae_status_vs_old_synthetic_target": "FAIL"
+    },
+    "capital": {
+      "valid": true,
+      "diagnostic_rows": 12,
+      "diagnostic_status_counts": {
+        "PASS": 12,
+        "FAIL": 0,
+        "UNAVAILABLE": 0
+      },
+      "binding_counts_all_periods": {
+        "target_cap_active": 10,
+        "investment_zero_floor_active": 0,
+        "investment_growth_cap_active": 10,
+        "credit_rationing_material": 0,
+        "goods_rationing_material": 12
+      },
+      "macro_mae_status_vs_old_synthetic_target": "FAIL"
+    },
+    "price": {
+      "valid": true,
+      "diagnostic_rows": 12,
+      "diagnostic_status_counts": {
+        "PASS": 12,
+        "FAIL": 0,
+        "UNAVAILABLE": 0
+      },
+      "binding_counts_all_periods": {
+        "target_cap_active": 12,
+        "investment_zero_floor_active": 0,
+        "investment_growth_cap_active": 12,
+        "credit_rationing_material": 0,
+        "goods_rationing_material": 12
+      },
+      "macro_mae_status_vs_old_synthetic_target": "FAIL"
+    },
+    "expectation": {
+      "valid": true,
+      "diagnostic_rows": 12,
+      "diagnostic_status_counts": {
+        "PASS": 12,
+        "FAIL": 0,
+        "UNAVAILABLE": 0
+      },
+      "binding_counts_all_periods": {
+        "target_cap_active": 12,
+        "investment_zero_floor_active": 0,
+        "investment_growth_cap_active": 12,
+        "credit_rationing_material": 0,
+        "goods_rationing_material": 12
+      },
+      "macro_mae_status_vs_old_synthetic_target": "FAIL"
+    }
+  },
+  "logging_invariance_exact": true,
+  "long_smoke": {
+    "valid": true,
+    "periods": 27
+  },
+  "paired_transmission": {
+    "capital": [
+      {
+        "seed": 908901,
+        "period": 1,
+        "deltas": {
+          "real_lending_rate": 0.0,
+          "capital_user_cost": 0.0,
+          "target_capital": 52135233.560473144,
+          "desired_investment": 0.0,
+          "financed_investment": 0.0,
+          "actual_investment": 0.0
+        },
+        "baseline_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        },
+        "changed_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        }
+      },
+      {
+        "seed": 908901,
+        "period": 2,
+        "deltas": {
+          "real_lending_rate": 0.0,
+          "capital_user_cost": 0.0,
+          "target_capital": 45785341.25628543,
+          "desired_investment": -671321.2660937607,
+          "financed_investment": -671321.2660937607,
+          "actual_investment": 0.0
+        },
+        "baseline_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        },
+        "changed_flags": {
+          "target_cap_active": false,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": false,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        }
+      },
+      {
+        "seed": 908901,
+        "period": 3,
+        "deltas": {
+          "real_lending_rate": 0.0,
+          "capital_user_cost": 0.0,
+          "target_capital": 52902163.6289787,
+          "desired_investment": 0.0,
+          "financed_investment": 0.0,
+          "actual_investment": -14306.578986860812
+        },
+        "baseline_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        },
+        "changed_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        }
+      },
+      {
+        "seed": 908901,
+        "period": 4,
+        "deltas": {
+          "real_lending_rate": 0.0011449890001304919,
+          "capital_user_cost": 0.0011449890001304919,
+          "target_capital": 53321795.693546176,
+          "desired_investment": -1573.7236885540187,
+          "financed_investment": -1573.7236885540187,
+          "actual_investment": -14345.422123484313
+        },
+        "baseline_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        },
+        "changed_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        }
+      },
+      {
+        "seed": 908902,
+        "period": 1,
+        "deltas": {
+          "real_lending_rate": 0.0,
+          "capital_user_cost": 0.0,
+          "target_capital": 53039161.560473144,
+          "desired_investment": 3.725290298461914e-09,
+          "financed_investment": 3.725290298461914e-09,
+          "actual_investment": 0.0
+        },
+        "baseline_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        },
+        "changed_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        }
+      },
+      {
+        "seed": 908902,
+        "period": 2,
+        "deltas": {
+          "real_lending_rate": 0.0,
+          "capital_user_cost": 0.0,
+          "target_capital": 38901165.963437945,
+          "desired_investment": -1438094.0174352713,
+          "financed_investment": -1438094.0174352713,
+          "actual_investment": 0.0
+        },
+        "baseline_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        },
+        "changed_flags": {
+          "target_cap_active": false,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": false,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        }
+      },
+      {
+        "seed": 908902,
+        "period": 3,
+        "deltas": {
+          "real_lending_rate": 0.0,
+          "capital_user_cost": 0.0,
+          "target_capital": 53570706.56284243,
+          "desired_investment": 0.0,
+          "financed_investment": 0.0,
+          "actual_investment": -30317.285937596112
+        },
+        "baseline_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        },
+        "changed_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        }
+      },
+      {
+        "seed": 908902,
+        "period": 4,
+        "deltas": {
+          "real_lending_rate": 0.00244210273695189,
+          "capital_user_cost": 0.00244210273695189,
+          "target_capital": 53856763.18572003,
+          "desired_investment": -3334.9014531336725,
+          "financed_investment": -3334.9014531336725,
+          "actual_investment": -29738.47705563903
+        },
+        "baseline_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        },
+        "changed_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        }
+      },
+      {
+        "seed": 908903,
+        "period": 1,
+        "deltas": {
+          "real_lending_rate": 0.0,
+          "capital_user_cost": 0.0,
+          "target_capital": 37395005.310473114,
+          "desired_investment": 3.725290298461914e-09,
+          "financed_investment": 3.725290298461914e-09,
+          "actual_investment": 0.0
+        },
+        "baseline_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        },
+        "changed_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        }
+      },
+      {
+        "seed": 908903,
+        "period": 2,
+        "deltas": {
+          "real_lending_rate": 0.0,
+          "capital_user_cost": 0.0,
+          "target_capital": 38808967.149270296,
+          "desired_investment": 0.0,
+          "financed_investment": 0.0,
+          "actual_investment": 0.0
+        },
+        "baseline_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        },
+        "changed_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        }
+      },
+      {
+        "seed": 908903,
+        "period": 3,
+        "deltas": {
+          "real_lending_rate": 0.0,
+          "capital_user_cost": 0.0,
+          "target_capital": 40213079.9452768,
+          "desired_investment": 0.0,
+          "financed_investment": 0.0,
+          "actual_investment": 0.0
+        },
+        "baseline_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        },
+        "changed_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        }
+      },
+      {
+        "seed": 908903,
+        "period": 4,
+        "deltas": {
+          "real_lending_rate": 0.0,
+          "capital_user_cost": 0.0,
+          "target_capital": 41607475.77141273,
+          "desired_investment": -3.725290298461914e-09,
+          "financed_investment": -3.725290298461914e-09,
+          "actual_investment": 0.0
+        },
+        "baseline_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        },
+        "changed_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        }
+      }
+    ],
+    "price": [
+      {
+        "seed": 908901,
+        "period": 1,
+        "deltas": {
+          "real_lending_rate": 0.0,
+          "capital_user_cost": 0.0,
+          "target_capital": 0.0,
+          "desired_investment": 0.0,
+          "financed_investment": 0.0,
+          "actual_investment": 0.0
+        },
+        "baseline_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        },
+        "changed_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        }
+      },
+      {
+        "seed": 908901,
+        "period": 2,
+        "deltas": {
+          "real_lending_rate": 0.0,
+          "capital_user_cost": 0.0,
+          "target_capital": 0.0,
+          "desired_investment": 0.0,
+          "financed_investment": 0.0,
+          "actual_investment": 104211.84240871295
+        },
+        "baseline_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        },
+        "changed_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        }
+      },
+      {
+        "seed": 908901,
+        "period": 3,
+        "deltas": {
+          "real_lending_rate": -0.00835861009124328,
+          "capital_user_cost": -0.00835861009124328,
+          "target_capital": 130264.80301085114,
+          "desired_investment": 11463.302664954215,
+          "financed_investment": 11463.302664954215,
+          "actual_investment": 205029.48621217534
+        },
+        "baseline_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        },
+        "changed_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        }
+      },
+      {
+        "seed": 908901,
+        "period": 4,
+        "deltas": {
+          "real_lending_rate": -0.011987700527796297,
+          "capital_user_cost": -0.011987700527796297,
+          "target_capital": 378735.7725954056,
+          "desired_investment": 33328.74798839539,
+          "financed_investment": 33328.74798839539,
+          "actual_investment": 298723.2788635716
+        },
+        "baseline_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        },
+        "changed_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        }
+      },
+      {
+        "seed": 908902,
+        "period": 1,
+        "deltas": {
+          "real_lending_rate": 0.0,
+          "capital_user_cost": 0.0,
+          "target_capital": 0.0,
+          "desired_investment": 0.0,
+          "financed_investment": 0.0,
+          "actual_investment": 0.0
+        },
+        "baseline_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        },
+        "changed_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        }
+      },
+      {
+        "seed": 908902,
+        "period": 2,
+        "deltas": {
+          "real_lending_rate": 0.0,
+          "capital_user_cost": 0.0,
+          "target_capital": 0.0,
+          "desired_investment": 0.0,
+          "financed_investment": 0.0,
+          "actual_investment": 110517.44636270404
+        },
+        "baseline_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        },
+        "changed_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        }
+      },
+      {
+        "seed": 908902,
+        "period": 3,
+        "deltas": {
+          "real_lending_rate": -0.008923385009250828,
+          "capital_user_cost": -0.008923385009250828,
+          "target_capital": 138146.8079533875,
+          "desired_investment": 12156.919099897146,
+          "financed_investment": 12156.919099897146,
+          "actual_investment": 213269.0617092736
+        },
+        "baseline_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        },
+        "changed_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        }
+      },
+      {
+        "seed": 908902,
+        "period": 4,
+        "deltas": {
+          "real_lending_rate": -0.012760030399149969,
+          "capital_user_cost": -0.012760030399149969,
+          "target_capital": 396444.32661277056,
+          "desired_investment": 34887.100741922855,
+          "financed_investment": 34887.100741922855,
+          "actual_investment": 308432.18458630145
+        },
+        "baseline_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        },
+        "changed_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        }
+      },
+      {
+        "seed": 908903,
+        "period": 1,
+        "deltas": {
+          "real_lending_rate": 0.0,
+          "capital_user_cost": 0.0,
+          "target_capital": 0.0,
+          "desired_investment": 0.0,
+          "financed_investment": 0.0,
+          "actual_investment": 0.0
+        },
+        "baseline_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        },
+        "changed_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        }
+      },
+      {
+        "seed": 908903,
+        "period": 2,
+        "deltas": {
+          "real_lending_rate": 0.0,
+          "capital_user_cost": 0.0,
+          "target_capital": 0.0,
+          "desired_investment": 0.0,
+          "financed_investment": 0.0,
+          "actual_investment": 20602.954040959477
+        },
+        "baseline_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        },
+        "changed_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        }
+      },
+      {
+        "seed": 908903,
+        "period": 3,
+        "deltas": {
+          "real_lending_rate": -0.0018147082449138097,
+          "capital_user_cost": -0.0018147082449138097,
+          "target_capital": 25753.692551225424,
+          "desired_investment": 2266.3249445073307,
+          "financed_investment": 2266.3249445073307,
+          "actual_investment": 44470.6494442299
+        },
+        "baseline_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        },
+        "changed_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        }
+      },
+      {
+        "seed": 908903,
+        "period": 4,
+        "deltas": {
+          "real_lending_rate": -0.00294924244351491,
+          "capital_user_cost": -0.00294924244351491,
+          "target_capital": 79796.78280341625,
+          "desired_investment": 7022.116886701435,
+          "financed_investment": 7022.116886701435,
+          "actual_investment": 71522.38766016811
+        },
+        "baseline_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        },
+        "changed_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        }
+      }
+    ],
+    "expectation": [
+      {
+        "seed": 908901,
+        "period": 1,
+        "deltas": {
+          "real_lending_rate": 0.0,
+          "capital_user_cost": 0.0,
+          "target_capital": 0.0,
+          "desired_investment": 0.0,
+          "financed_investment": 0.0,
+          "actual_investment": 0.0
+        },
+        "baseline_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        },
+        "changed_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        }
+      },
+      {
+        "seed": 908901,
+        "period": 2,
+        "deltas": {
+          "real_lending_rate": 0.004003031317048267,
+          "capital_user_cost": 0.004003031317048267,
+          "target_capital": 0.0,
+          "desired_investment": 0.0,
+          "financed_investment": 0.0,
+          "actual_investment": 0.0
+        },
+        "baseline_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        },
+        "changed_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        }
+      },
+      {
+        "seed": 908901,
+        "period": 3,
+        "deltas": {
+          "real_lending_rate": -0.003449869972410702,
+          "capital_user_cost": -0.003449869972410702,
+          "target_capital": 0.0,
+          "desired_investment": 0.0,
+          "financed_investment": 0.0,
+          "actual_investment": 0.0
+        },
+        "baseline_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        },
+        "changed_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        }
+      },
+      {
+        "seed": 908901,
+        "period": 4,
+        "deltas": {
+          "real_lending_rate": -0.0032305337146449897,
+          "capital_user_cost": -0.0032305337146449897,
+          "target_capital": 0.0,
+          "desired_investment": 0.0,
+          "financed_investment": 0.0,
+          "actual_investment": 0.0
+        },
+        "baseline_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        },
+        "changed_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        }
+      },
+      {
+        "seed": 908902,
+        "period": 1,
+        "deltas": {
+          "real_lending_rate": 0.0,
+          "capital_user_cost": 0.0,
+          "target_capital": 0.0,
+          "desired_investment": 0.0,
+          "financed_investment": 0.0,
+          "actual_investment": 0.0
+        },
+        "baseline_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        },
+        "changed_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        }
+      },
+      {
+        "seed": 908902,
+        "period": 2,
+        "deltas": {
+          "real_lending_rate": 0.004003031317048267,
+          "capital_user_cost": 0.004003031317048267,
+          "target_capital": 0.0,
+          "desired_investment": 0.0,
+          "financed_investment": 0.0,
+          "actual_investment": 0.0
+        },
+        "baseline_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        },
+        "changed_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        }
+      },
+      {
+        "seed": 908902,
+        "period": 3,
+        "deltas": {
+          "real_lending_rate": -0.003890413147977889,
+          "capital_user_cost": -0.003890413147977889,
+          "target_capital": 0.0,
+          "desired_investment": 0.0,
+          "financed_investment": 0.0,
+          "actual_investment": 0.0
+        },
+        "baseline_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        },
+        "changed_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        }
+      },
+      {
+        "seed": 908902,
+        "period": 4,
+        "deltas": {
+          "real_lending_rate": -0.0035492169521964545,
+          "capital_user_cost": -0.0035492169521964545,
+          "target_capital": 0.0,
+          "desired_investment": 0.0,
+          "financed_investment": 0.0,
+          "actual_investment": 0.0
+        },
+        "baseline_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        },
+        "changed_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        }
+      },
+      {
+        "seed": 908903,
+        "period": 1,
+        "deltas": {
+          "real_lending_rate": 0.0,
+          "capital_user_cost": 0.0,
+          "target_capital": 0.0,
+          "desired_investment": 0.0,
+          "financed_investment": 0.0,
+          "actual_investment": 0.0
+        },
+        "baseline_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        },
+        "changed_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        }
+      },
+      {
+        "seed": 908903,
+        "period": 2,
+        "deltas": {
+          "real_lending_rate": 0.004003031317048267,
+          "capital_user_cost": 0.004003031317048267,
+          "target_capital": 0.0,
+          "desired_investment": 0.0,
+          "financed_investment": 0.0,
+          "actual_investment": 0.0
+        },
+        "baseline_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        },
+        "changed_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        }
+      },
+      {
+        "seed": 908903,
+        "period": 3,
+        "deltas": {
+          "real_lending_rate": 0.0017549952157420723,
+          "capital_user_cost": 0.0017549952157420723,
+          "target_capital": 0.0,
+          "desired_investment": 0.0,
+          "financed_investment": 0.0,
+          "actual_investment": 0.0
+        },
+        "baseline_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        },
+        "changed_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        }
+      },
+      {
+        "seed": 908903,
+        "period": 4,
+        "deltas": {
+          "real_lending_rate": 0.0005731036259166711,
+          "capital_user_cost": 0.0005731036259166711,
+          "target_capital": 0.0,
+          "desired_investment": 0.0,
+          "financed_investment": 0.0,
+          "actual_investment": 0.0
+        },
+        "baseline_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        },
+        "changed_flags": {
+          "target_cap_active": true,
+          "investment_zero_floor_active": false,
+          "investment_growth_cap_active": true,
+          "credit_rationing_material": false,
+          "goods_rationing_material": true
+        }
+      }
+    ]
+  },
+  "simulator_paths": 14,
+  "valid_paths": 14,
+  "investment_diagnostic_rows": 79,
+  "investment_diagnostic_all_passed": true,
+  "diagnostic_failures": [],
+  "old_outputs_unchanged": true,
+  "tracked_sources_unchanged": true,
+  "optimizer_runs": 0,
+  "taskbook_acceptance": "NOT_EVALUATED"
+}

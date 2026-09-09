@@ -1,0 +1,21 @@
+# Local research data and generated output are not part of this source snapshot.
+/data/
+/runs/
+/preserved*/
+__pycache__/
+*.py[cod]
+.env
+.env.*
+*.csv
+*.tsv
+*.xlsx
+*.xls
+*.zip
+*.7z
+*.dta
+*.sav
+*.parquet
+*.pkl
+*.pt
+*.pth
+*.log

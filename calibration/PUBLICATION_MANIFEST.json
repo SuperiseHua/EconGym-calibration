@@ -1,0 +1,326 @@
+{
+  "schema_version": 1,
+  "date": "2026-09-10",
+  "base_commit": "ddc0a418965db3982fd594c678329309c241aeb1",
+  "evidence_level": "development_only",
+  "upstream_source_modified": false,
+  "full_data_or_trajectory_archive": false,
+  "copies": [
+    {
+      "path": "analyze_runtime_probe.py",
+      "source_relative": "analyze_runtime_probe.py",
+      "sha256": "c7f78fa9e3fa5ebc582e08f88b6713a47deed425281cc52fdcbc7f72a1241313",
+      "bytes": 4541,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "path": "audit.py",
+      "source_relative": "audit.py",
+      "sha256": "226fa6ca3883177de1236129fee8f0b57c1338367afc2c1aed10712259894c5f",
+      "bytes": 4126,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "path": "bridge.py",
+      "source_relative": "bridge.py",
+      "sha256": "dce417d58aae8a8e71b94eaa9adfe579e975b2d77059e71f687b2a74e2e2ee88",
+      "bytes": 18683,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "path": "build_collected_data.py",
+      "source_relative": "build_collected_data.py",
+      "sha256": "51d671842866770ef5356a51e2c5e0dbb7fc2a053e6dfa36892ac3937a539f79",
+      "bytes": 15974,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "path": "check_interfaces.py",
+      "source_relative": "check_interfaces.py",
+      "sha256": "d5a51a763bb1043adbf3afe766cfaa663d7dbaaf5f6fe99846bfe54b8c826aa1",
+      "bytes": 4054,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "path": "check_mae_investment_runtime.py",
+      "source_relative": "check_mae_investment_runtime.py",
+      "sha256": "185c47ea13ec11b0ac71232d63874366a3b7e1425001d7a372c36239b66732c8",
+      "bytes": 8166,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "path": "core.py",
+      "source_relative": "core.py",
+      "sha256": "66faf9fde9b5dd435e02603804fb5b33be4fd57316e5b00113381a2e10567f56",
+      "bytes": 9957,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "path": "data_access.py",
+      "source_relative": "data_access.py",
+      "sha256": "f8621b2565bd6a70888214c641ce30b583adc4c78c2830af6d55cf1ddbb9922b",
+      "bytes": 2880,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "path": "development_runtime_probe.py",
+      "source_relative": "development_runtime_probe.py",
+      "sha256": "fc35f1062a44213e1d00a2385884d3ed4c0ef5347b76c27c7ab8b1f53cc2c6e7",
+      "bytes": 11082,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "path": "fetch_data_supplement.py",
+      "source_relative": "fetch_data_supplement.py",
+      "sha256": "eb450b218a29baf3b8892622fbf6f73956f6601287640a5e576465dbb638b16f",
+      "bytes": 4677,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "path": "foundation_noise_development.py",
+      "source_relative": "foundation_noise_development.py",
+      "sha256": "60987b93965cac0bf97482d59f7efd1ba1896373d0ba5b91e84631e0b18f7b53",
+      "bytes": 13413,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "path": "investment_diagnostics.py",
+      "source_relative": "investment_diagnostics.py",
+      "sha256": "c2d73b642ab7be73889ee19cb92fd2c766b091ca5374277b658747b7d2d9c17c",
+      "bytes": 6857,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "path": "launch.py",
+      "source_relative": "launch.py",
+      "sha256": "705d13731263d8cadf0431d31f70882311e924075e9d46dd1c6262aadaa78f52",
+      "bytes": 508,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "path": "mae_acceptance.py",
+      "source_relative": "mae_acceptance.py",
+      "sha256": "41c9c3a9dd571d02d12cee9011d6bcd190a2cdf56d67941075827448eb0108a6",
+      "bytes": 7999,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "path": "sector_accounting.py",
+      "source_relative": "sector_accounting.py",
+      "sha256": "a37baaf8e854e93bc0263efd62bdcbd15c7e6352255348d6e971a3ba8a89d1fb",
+      "bytes": 6141,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "path": "taskbook_inputs.py",
+      "source_relative": "taskbook_inputs.py",
+      "sha256": "a04c0c012a86960b1b95f7219f521e1b8a3b2b298a3ca463253705bc500c1105",
+      "bytes": 4450,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "path": "test_bridge.py",
+      "source_relative": "test_bridge.py",
+      "sha256": "b4a0f2a2a6d3bbcef653bb45e2e74bd594175e423c60d7aceb1c036ba00b1b60",
+      "bytes": 3355,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "path": "test_mae_investment.py",
+      "source_relative": "test_mae_investment.py",
+      "sha256": "ff7fcaec1f23dc05ec35e2ee8d263ac09212b421d7e9dbdb05685404a3be3db2",
+      "bytes": 8738,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "path": "test_sector_accounting.py",
+      "source_relative": "test_sector_accounting.py",
+      "sha256": "7fa7e9bf9df4631624d116c065f94c896c0619a65237f6583923de5a44dfca27",
+      "bytes": 2169,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "path": "test_taskbook_inputs.py",
+      "source_relative": "test_taskbook_inputs.py",
+      "sha256": "b104a08ebf410a2ccf9e5c7c92305999d2363741cc265d535fb69d3ce4768f9c",
+      "bytes": 9631,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "path": "verify_collected_data.py",
+      "source_relative": "verify_collected_data.py",
+      "sha256": "5b4a29924c6aec4980b98a391d812dee714f3becb654a472dcfcd81d87b4ec7d",
+      "bytes": 3276,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "path": "INTEGRATION_ISSUES_STATUS_20260908.md",
+      "source_relative": "INTEGRATION_ISSUES_STATUS_20260908.md",
+      "sha256": "99bbf38ecf45c64f978a402fc325f75cc068b7367b792999ea60998f11d4a3e1",
+      "bytes": 25530,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "path": "PRICE_STABILITY_CONTRACT_20260908.md",
+      "source_relative": "PRICE_STABILITY_CONTRACT_20260908.md",
+      "sha256": "50862c09627fb641ae63266b5267424ab5a847fb428e26da7d3e32154dd68569",
+      "bytes": 7037,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "path": "PRICE_STABILITY_REPORT_20260908.md",
+      "source_relative": "PRICE_STABILITY_REPORT_20260908.md",
+      "sha256": "c071b07411fef9647c2f10d3e97383770a5efda0b62aa19743e02a7c087e754e",
+      "bytes": 11232,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "path": "FOUNDATION_NOISE_ACCOUNTING_REPORT_20260908.md",
+      "source_relative": "FOUNDATION_NOISE_ACCOUNTING_REPORT_20260908.md",
+      "sha256": "1ef4865f23184326c07fdddb3b41fdb42ad0def7187382370f1403eadb79e3e4",
+      "bytes": 17487,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "path": "MAE_INVESTMENT_DIAGNOSTICS_20260908.md",
+      "source_relative": "MAE_INVESTMENT_DIAGNOSTICS_20260908.md",
+      "sha256": "fd426d991c65541882c36a6118e5eaeb77467512548bbec862f1599b1a7dde8d",
+      "bytes": 9627,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "path": "RUNTIME_EFFECT_REPORT_20260908.md",
+      "source_relative": "RUNTIME_EFFECT_REPORT_20260908.md",
+      "sha256": "41ceba243fb8b95d405ac7523b0adc58b1cdb96ed6513f4ee0201fa671f10daf",
+      "bytes": 10774,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "path": "DATA_INTEGRATION.md",
+      "source_relative": "DATA_INTEGRATION.md",
+      "sha256": "fa7a677dbda71644fcf9047da0615424244679c1b2fca8fa4bee3d1b4f9d81d8",
+      "bytes": 9091,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "path": "ALIGNMENT_REPORT.md",
+      "source_relative": "ALIGNMENT_REPORT.md",
+      "sha256": "33b6a6df4f761786ae7d930810f022fbfd038f0c31f982f124185eb896ac3f0b",
+      "bytes": 14690,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "path": "ADAPTATION_STATUS.md",
+      "source_relative": "ADAPTATION_STATUS.md",
+      "sha256": "9f730ea5914b6446fe3cfd536322720ad94898c32bea4fef0e7dd8e6bdce3136",
+      "bytes": 8834,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "path": "foundation_card.template.json",
+      "source_relative": "foundation_card.template.json",
+      "sha256": "8349154db1116026ea106587b80488596966822924a5065f810b326d387bb6bd",
+      "bytes": 489,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "path": "identification_policy_development.json",
+      "source_relative": "identification_policy_development.json",
+      "sha256": "6cafdd0b164c76c29d933c35fe36f57ee6f029f638e7abe354c0e7fcc95ad37b",
+      "bytes": 981,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "path": "LOCAL_DEVELOPMENT_README.md",
+      "source_relative": "README.md",
+      "sha256": "f2c2291453dfef9ce3c6e4088457e1092f8d8f72cf54d7211ede4b1661a3613f",
+      "bytes": 9410,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "path": "experiments/price_stability_v1/contract.py",
+      "source_relative": "experiments/price_stability_v1/contract.py",
+      "sha256": "08c19629e484d16dc6c6b869e2310dfcefd6a8a3739ec9c7b22d6700d2604086",
+      "bytes": 6800,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "path": "experiments/price_stability_v1/experiment.py",
+      "source_relative": "experiments/price_stability_v1/experiment.py",
+      "sha256": "172dbf24cc4d9a7253973578ed6efefe2906c5bd77d5d8fdd05b9f322698ac4e",
+      "bytes": 9993,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "path": "experiments/price_stability_v1/stability_stats.py",
+      "source_relative": "experiments/price_stability_v1/stability_stats.py",
+      "sha256": "3bc9029dc4402572dc25c852b621cc8153f4bc58512d6ec51bbba8288c6da324",
+      "bytes": 2509,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "path": "experiments/price_stability_v1/test_stability.py",
+      "source_relative": "experiments/price_stability_v1/test_stability.py",
+      "sha256": "4a2871fdf67eb53a7df8537f7eaad8b160e96a05a6df413d4e02c530d5774853",
+      "bytes": 3325,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "path": "tools/audit_foundation_outputs.py",
+      "source_relative": "tools/audit_foundation_outputs.py",
+      "sha256": "be3b0b216901b90f869b0bf1328e2fba22a95bddc2371c60dabf08991e9440ed",
+      "bytes": 4307,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "path": "tools/verify_price_stability.py",
+      "source_relative": "tools/verify_price_stability.py",
+      "sha256": "f197eea1323e034738b8cec40c8784cc9bdec68de422bf0cc117899d47e7a13f",
+      "bytes": 3999,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "path": "evidence/runtime_effect_v1/summary.json",
+      "source_relative": "runs/runtime_effect_v1/summary.json",
+      "sha256": "b34e710a4ad9a237355ff653dc6b4eb6ab1277a38a6fd373a13538b6db3cab5d",
+      "bytes": 13313,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "path": "evidence/mae_investment_v2/summary.json",
+      "source_relative": "runs/mae_investment_v2/summary.json",
+      "sha256": "437d690e9ceebf86e763bf94701e4f0742bb20bdd9ea9c097237e8a738476f21",
+      "bytes": 35853,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "path": "evidence/foundation_noise_v1/summary.json",
+      "source_relative": "runs/foundation_noise_v1/summary.json",
+      "sha256": "fb4884abbc000bf83282d59109a7296f0219b7cfb72cc4bcf74758db3f086f63",
+      "bytes": 17433,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "path": "evidence/price_stability_v1/summary.json",
+      "source_relative": "runs/price_stability_v1/summary.json",
+      "sha256": "e092b3f24c30206c4f9edcd3008b11e501155409f5b8d4d3b8fca33a2620a4ec",
+      "bytes": 19585,
+      "mode": "byte_identical_copy"
+    },
+    {
+      "path": "evidence/price_stability_v1/contract.json",
+      "source_relative": "runs/price_stability_v1/contract.json",
+      "sha256": "6e10e4553a57c256c23794d36029796b67ebc965a1b1d8828157823855af5527",
+      "bytes": 4361,
+      "mode": "byte_identical_copy"
+    }
+  ],
+  "publication_only_files": [
+    "README.md",
+    "PUBLICATION_SCOPE.md",
+    "run_unit_tests.py",
+    ".gitignore",
+    ".gitattributes",
+    "PUBLICATION_MANIFEST.json"
+  ]
+}

@@ -1,0 +1,554 @@
+{
+  "profiles": {
+    "upstream_default": {
+      "base_valid": true,
+      "base_accounting": {
+        "rows": 48,
+        "all_passed": true,
+        "failures": []
+      },
+      "status": "WEAK_IDENTIFICATION",
+      "singular_ratio": 3.866099668132478e-05,
+      "parameters": {
+        "capital_adjustment_speed": {
+          "half_step_RMS": 0.03332302406249656,
+          "unique_fraction": 0.00041905426259477793,
+          "bootstrap_screen_pass_fraction": 0.0,
+          "recommendation": "temporarily_fix_or_report_weak"
+        },
+        "price_adjustment_speed": {
+          "half_step_RMS": 0.31491844401945496,
+          "unique_fraction": 0.9680733488178745,
+          "bootstrap_screen_pass_fraction": 1.0,
+          "recommendation": "candidate_free_parameter"
+        },
+        "inflation_expectation_lambda": {
+          "half_step_RMS": 0.05971192790784446,
+          "unique_fraction": 0.000419053647380446,
+          "bootstrap_screen_pass_fraction": 0.0,
+          "recommendation": "temporarily_fix_or_report_weak"
+        }
+      },
+      "base_binding_fractions": {
+        "target_cap_active": 0.7857142857142857,
+        "goods_rationing_material": 0.8333333333333334,
+        "credit_rationing_material": 0.0,
+        "investment_zero_floor_active": 0.16666666666666666
+      }
+    },
+    "private_nonresidential": {
+      "base_valid": true,
+      "base_accounting": {
+        "rows": 48,
+        "all_passed": true,
+        "failures": []
+      },
+      "status": "WEAK_IDENTIFICATION",
+      "singular_ratio": 0.0,
+      "parameters": {
+        "capital_adjustment_speed": {
+          "half_step_RMS": 1.3987495347505253e-16,
+          "unique_fraction": 0.7401486830834376,
+          "bootstrap_screen_pass_fraction": 0.0,
+          "recommendation": "temporarily_fix_or_report_weak"
+        },
+        "price_adjustment_speed": {
+          "half_step_RMS": 0.16764241612800188,
+          "unique_fraction": 1.0,
+          "bootstrap_screen_pass_fraction": 1.0,
+          "recommendation": "candidate_free_parameter"
+        },
+        "inflation_expectation_lambda": {
+          "half_step_RMS": 0.0,
+          "unique_fraction": 0.0,
+          "bootstrap_screen_pass_fraction": 0.0,
+          "recommendation": "temporarily_fix_or_report_weak"
+        }
+      },
+      "base_binding_fractions": {
+        "target_cap_active": 1.0,
+        "goods_rationing_material": 0.07142857142857142,
+        "credit_rationing_material": 0.0,
+        "investment_zero_floor_active": 0.0
+      }
+    },
+    "private_total": {
+      "base_valid": true,
+      "base_accounting": {
+        "rows": 48,
+        "all_passed": true,
+        "failures": []
+      },
+      "status": "WEAK_IDENTIFICATION",
+      "singular_ratio": 0.0,
+      "parameters": {
+        "capital_adjustment_speed": {
+          "half_step_RMS": 2.5801147528613475e-16,
+          "unique_fraction": 0.9990337065138942,
+          "bootstrap_screen_pass_fraction": 0.0,
+          "recommendation": "temporarily_fix_or_report_weak"
+        },
+        "price_adjustment_speed": {
+          "half_step_RMS": 0.055857782829835195,
+          "unique_fraction": 0.9990337065138941,
+          "bootstrap_screen_pass_fraction": 0.725,
+          "recommendation": "temporarily_fix_or_report_weak"
+        },
+        "inflation_expectation_lambda": {
+          "half_step_RMS": 0.0,
+          "unique_fraction": 0.0,
+          "bootstrap_screen_pass_fraction": 0.0,
+          "recommendation": "temporarily_fix_or_report_weak"
+        }
+      },
+      "base_binding_fractions": {
+        "target_cap_active": 1.0,
+        "goods_rationing_material": 0.8571428571428571,
+        "credit_rationing_material": 0.0,
+        "investment_zero_floor_active": 0.0
+      }
+    },
+    "all_fixed_assets": {
+      "base_valid": true,
+      "base_accounting": {
+        "rows": 48,
+        "all_passed": true,
+        "failures": []
+      },
+      "status": "WEAK_IDENTIFICATION",
+      "singular_ratio": 0.0,
+      "parameters": {
+        "capital_adjustment_speed": {
+          "half_step_RMS": 7.390905714872672e-16,
+          "unique_fraction": 0.9228192364595155,
+          "bootstrap_screen_pass_fraction": 0.0,
+          "recommendation": "temporarily_fix_or_report_weak"
+        },
+        "price_adjustment_speed": {
+          "half_step_RMS": 0.18758962790161465,
+          "unique_fraction": 0.9228192364595155,
+          "bootstrap_screen_pass_fraction": 1.0,
+          "recommendation": "candidate_free_parameter"
+        },
+        "inflation_expectation_lambda": {
+          "half_step_RMS": 0.0,
+          "unique_fraction": 0.0,
+          "bootstrap_screen_pass_fraction": 0.0,
+          "recommendation": "temporarily_fix_or_report_weak"
+        }
+      },
+      "base_binding_fractions": {
+        "target_cap_active": 1.0,
+        "goods_rationing_material": 1.0,
+        "credit_rationing_material": 0.0,
+        "investment_zero_floor_active": 0.0
+      }
+    },
+    "private_alpha32": {
+      "base_valid": true,
+      "base_accounting": {
+        "rows": 48,
+        "all_passed": true,
+        "failures": []
+      },
+      "status": "WEAK_IDENTIFICATION",
+      "singular_ratio": 0.0,
+      "parameters": {
+        "capital_adjustment_speed": {
+          "half_step_RMS": 0.0,
+          "unique_fraction": 0.0,
+          "bootstrap_screen_pass_fraction": 0.0,
+          "recommendation": "temporarily_fix_or_report_weak"
+        },
+        "price_adjustment_speed": {
+          "half_step_RMS": 0.10534752673177278,
+          "unique_fraction": 1.0,
+          "bootstrap_screen_pass_fraction": 1.0,
+          "recommendation": "candidate_free_parameter"
+        },
+        "inflation_expectation_lambda": {
+          "half_step_RMS": 0.0,
+          "unique_fraction": 0.0,
+          "bootstrap_screen_pass_fraction": 0.0,
+          "recommendation": "temporarily_fix_or_report_weak"
+        }
+      },
+      "base_binding_fractions": {
+        "target_cap_active": 1.0,
+        "goods_rationing_material": 1.0,
+        "credit_rationing_material": 0.0,
+        "investment_zero_floor_active": 0.0
+      }
+    },
+    "private_alpha40": {
+      "base_valid": true,
+      "base_accounting": {
+        "rows": 48,
+        "all_passed": true,
+        "failures": []
+      },
+      "status": "WEAK_IDENTIFICATION",
+      "singular_ratio": 0.0,
+      "parameters": {
+        "capital_adjustment_speed": {
+          "half_step_RMS": 7.14184582606994e-16,
+          "unique_fraction": 0.9993251165993191,
+          "bootstrap_screen_pass_fraction": 0.0,
+          "recommendation": "temporarily_fix_or_report_weak"
+        },
+        "price_adjustment_speed": {
+          "half_step_RMS": 0.031347767579094805,
+          "unique_fraction": 0.999325116599319,
+          "bootstrap_screen_pass_fraction": 0.215,
+          "recommendation": "temporarily_fix_or_report_weak"
+        },
+        "inflation_expectation_lambda": {
+          "half_step_RMS": 0.0,
+          "unique_fraction": 0.0,
+          "bootstrap_screen_pass_fraction": 0.0,
+          "recommendation": "temporarily_fix_or_report_weak"
+        }
+      },
+      "base_binding_fractions": {
+        "target_cap_active": 1.0,
+        "goods_rationing_material": 0.40476190476190477,
+        "credit_rationing_material": 0.0,
+        "investment_zero_floor_active": 0.0
+      }
+    },
+    "private_delta04": {
+      "base_valid": true,
+      "base_accounting": {
+        "rows": 48,
+        "all_passed": true,
+        "failures": []
+      },
+      "status": "WEAK_IDENTIFICATION",
+      "singular_ratio": 0.0,
+      "parameters": {
+        "capital_adjustment_speed": {
+          "half_step_RMS": 4.1411018808230946e-16,
+          "unique_fraction": 0.9998834457303536,
+          "bootstrap_screen_pass_fraction": 0.0,
+          "recommendation": "temporarily_fix_or_report_weak"
+        },
+        "price_adjustment_speed": {
+          "half_step_RMS": 0.043874885571589285,
+          "unique_fraction": 0.9998834457303536,
+          "bootstrap_screen_pass_fraction": 0.305,
+          "recommendation": "temporarily_fix_or_report_weak"
+        },
+        "inflation_expectation_lambda": {
+          "half_step_RMS": 0.0,
+          "unique_fraction": 0.0,
+          "bootstrap_screen_pass_fraction": 0.0,
+          "recommendation": "temporarily_fix_or_report_weak"
+        }
+      },
+      "base_binding_fractions": {
+        "target_cap_active": 1.0,
+        "goods_rationing_material": 0.23809523809523808,
+        "credit_rationing_material": 0.0,
+        "investment_zero_floor_active": 0.0
+      }
+    },
+    "private_delta09": {
+      "base_valid": true,
+      "base_accounting": {
+        "rows": 48,
+        "all_passed": true,
+        "failures": []
+      },
+      "status": "WEAK_IDENTIFICATION",
+      "singular_ratio": 0.0,
+      "parameters": {
+        "capital_adjustment_speed": {
+          "half_step_RMS": 0.0,
+          "unique_fraction": 0.0,
+          "bootstrap_screen_pass_fraction": 0.0,
+          "recommendation": "temporarily_fix_or_report_weak"
+        },
+        "price_adjustment_speed": {
+          "half_step_RMS": 0.22650339539515094,
+          "unique_fraction": 1.0,
+          "bootstrap_screen_pass_fraction": 1.0,
+          "recommendation": "candidate_free_parameter"
+        },
+        "inflation_expectation_lambda": {
+          "half_step_RMS": 0.0,
+          "unique_fraction": 0.0,
+          "bootstrap_screen_pass_fraction": 0.0,
+          "recommendation": "temporarily_fix_or_report_weak"
+        }
+      },
+      "base_binding_fractions": {
+        "target_cap_active": 1.0,
+        "goods_rationing_material": 1.0,
+        "credit_rationing_material": 0.0,
+        "investment_zero_floor_active": 0.0
+      }
+    }
+  },
+  "noise": {
+    "256": {
+      "per_axis_seed_SD": {
+        "inflation": 0.03589173462160739,
+        "real_gdp_growth": 0.01043698942242891,
+        "consumption_gdp": 0.06901137564519248,
+        "investment_gdp": 0.1050184928855043
+      },
+      "mean_estimator_bootstrap_RMS": {
+        "2": 1.7915326993588567,
+        "8": 0.9065726124689587,
+        "16": 0.6212277953181998,
+        "32": 0.46154167497406323
+      },
+      "note": "empirical bootstrap conditional on 64-seed pool, not real-world uncertainty",
+      "accounting": {
+        "rows": 512,
+        "all_passed": true,
+        "failures": []
+      }
+    },
+    "1000": {
+      "per_axis_seed_SD": {
+        "inflation": 0.04241029791711468,
+        "real_gdp_growth": 0.00910526767792119,
+        "consumption_gdp": 0.05064353149134839,
+        "investment_gdp": 0.10843337635153588
+      },
+      "mean_estimator_bootstrap_RMS": {
+        "2": 2.0244118563898215,
+        "8": 0.9996696534417089,
+        "16": 0.6746918533151267,
+        "32": 0.4791458456186089
+      },
+      "note": "empirical bootstrap conditional on 64-seed pool, not real-world uncertainty",
+      "accounting": {
+        "rows": 512,
+        "all_passed": true,
+        "failures": []
+      }
+    }
+  },
+  "search": {
+    "selected": {
+      "2": 2,
+      "16": 4
+    },
+    "candidates": [
+      {
+        "index": 0,
+        "parameters": {
+          "capital_adjustment_speed": 0.2,
+          "price_adjustment_speed": 0.2,
+          "inflation_expectation_lambda": 0.5
+        },
+        "valid": true,
+        "losses": {
+          "2": 2.5867302276810777,
+          "16": 0.7374254453981308
+        }
+      },
+      {
+        "index": 1,
+        "parameters": {
+          "capital_adjustment_speed": 0.30416363591275547,
+          "price_adjustment_speed": 0.3070024757376776,
+          "inflation_expectation_lambda": 0.8152112130486944
+        },
+        "valid": true,
+        "losses": {
+          "2": 2.3204659000845846,
+          "16": 1.4682087285761871
+        }
+      },
+      {
+        "index": 2,
+        "parameters": {
+          "capital_adjustment_speed": 0.09810033640200369,
+          "price_adjustment_speed": 0.29397187016159715,
+          "inflation_expectation_lambda": 0.4644377987427275
+        },
+        "valid": true,
+        "losses": {
+          "2": 0.7101784200405071,
+          "16": 0.45715993419100526
+        }
+      },
+      {
+        "index": 3,
+        "parameters": {
+          "capital_adjustment_speed": 0.17134715031991188,
+          "price_adjustment_speed": 0.18241006498162438,
+          "inflation_expectation_lambda": 0.1817616358235843
+        },
+        "valid": true,
+        "losses": {
+          "2": 1.2127309841762435,
+          "16": 0.7969715378612959
+        }
+      },
+      {
+        "index": 4,
+        "parameters": {
+          "capital_adjustment_speed": 0.20749524306578926,
+          "price_adjustment_speed": 0.26384915291055444,
+          "inflation_expectation_lambda": 0.4550682499831544
+        },
+        "valid": true,
+        "losses": {
+          "2": 2.310435647144742,
+          "16": 0.32439712743028887
+        }
+      },
+      {
+        "index": 5,
+        "parameters": {
+          "capital_adjustment_speed": 0.3861952588667875,
+          "price_adjustment_speed": 0.09539990309796764,
+          "inflation_expectation_lambda": 0.6968642811290883
+        },
+        "valid": true,
+        "losses": {
+          "2": 2.9849732480236377,
+          "16": 1.9517283174393294
+        }
+      },
+      {
+        "index": 6,
+        "parameters": {
+          "capital_adjustment_speed": 0.11052227347560398,
+          "price_adjustment_speed": 0.22930762594575577,
+          "inflation_expectation_lambda": 0.5039276718034716
+        },
+        "valid": true,
+        "losses": {
+          "2": 1.1954511711793956,
+          "16": 0.48788711792721234
+        }
+      },
+      {
+        "index": 7,
+        "parameters": {
+          "capital_adjustment_speed": 0.17654052154826128,
+          "price_adjustment_speed": 0.08007532579433287,
+          "inflation_expectation_lambda": 0.8073475403342928
+        },
+        "valid": true,
+        "losses": {
+          "2": 2.837650708628904,
+          "16": 1.9731917686125462
+        }
+      },
+      {
+        "index": 8,
+        "parameters": {
+          "capital_adjustment_speed": 0.05762878584363467,
+          "price_adjustment_speed": 0.06024688572969733,
+          "inflation_expectation_lambda": 0.897477271693961
+        },
+        "valid": true,
+        "losses": {
+          "2": 1.9873005890654352,
+          "16": 1.9776599380126416
+        }
+      },
+      {
+        "index": 9,
+        "parameters": {
+          "capital_adjustment_speed": 0.20163599756775158,
+          "price_adjustment_speed": 0.39106860285113476,
+          "inflation_expectation_lambda": 0.4759021317753779
+        },
+        "valid": true,
+        "losses": {
+          "2": 2.6759977664835395,
+          "16": 0.9657733327850218
+        }
+      },
+      {
+        "index": 10,
+        "parameters": {
+          "capital_adjustment_speed": 0.2441561241243282,
+          "price_adjustment_speed": 0.27367146326556113,
+          "inflation_expectation_lambda": 0.3802779400423687
+        },
+        "valid": true,
+        "losses": {
+          "2": 2.321376292547936,
+          "16": 0.3333702821322414
+        }
+      },
+      {
+        "index": 11,
+        "parameters": {
+          "capital_adjustment_speed": 0.36658031779684236,
+          "price_adjustment_speed": 0.13389511556186634,
+          "inflation_expectation_lambda": 0.6283286698082844
+        },
+        "valid": true,
+        "losses": {
+          "2": 2.931709161598218,
+          "16": 1.6386121876862965
+        }
+      }
+    ],
+    "validations": {
+      "0": {
+        "normalized_RMSE": 1.1332813017657941,
+        "macro_MAE": "FAIL",
+        "per_seed_all_axes_pass_fraction": 0.1875,
+        "accounting": {
+          "rows": 128,
+          "all_passed": true,
+          "failures": []
+        }
+      },
+      "2": {
+        "normalized_RMSE": 0.5804260038778287,
+        "macro_MAE": "PASS",
+        "per_seed_all_axes_pass_fraction": 0.0,
+        "accounting": {
+          "rows": 128,
+          "all_passed": true,
+          "failures": []
+        }
+      },
+      "4": {
+        "normalized_RMSE": 0.8142684228351142,
+        "macro_MAE": "FAIL",
+        "per_seed_all_axes_pass_fraction": 0.0,
+        "accounting": {
+          "rows": 128,
+          "all_passed": true,
+          "failures": []
+        }
+      }
+    },
+    "selection_bank_shared": true,
+    "larger_target_seeds": 32,
+    "search_sizes": [
+      2,
+      16
+    ],
+    "validation_seeds": 16,
+    "old_effect_run_not_replaced": true
+  },
+  "evidence_level": "development_predeclared_screen_not_confirmatory",
+  "accounting_logging_invariant": true,
+  "accounting_replay": {
+    "rows": 4,
+    "all_passed": true,
+    "failures": []
+  },
+  "totals": {
+    "calls": 75,
+    "requested_paths": 737,
+    "returned_paths": 737,
+    "valid_paths": 737
+  },
+  "tracked_sources_unchanged": true,
+  "full_taskbook_acceptance": false,
+  "real_data_fit": false
+}

@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "status": "FROZEN_DEVELOPMENT_DEFINITIONS_NOT_REAL_FIT_APPROVAL",
+  "frozen_utc": "2026-09-08T08:42:37.422338+00:00",
+  "reference_observations": {
+    "country": "US",
+    "vintage": "exact local collected_supplement_v2 files, no refresh",
+    "annualization": "mean of all 12 monthly or 4 quarterly SAAR observations; ratios of annual flows",
+    "inflation": {
+      "series": "PCEPI",
+      "formula": "annual_mean_index[y]/annual_mean_index[y-1]-1",
+      "excluded": [
+        "core PCE",
+        "CPI",
+        "December-over-December"
+      ]
+    },
+    "real_gdp_growth": {
+      "series": "GDPC1",
+      "formula": "annual_mean[y]/annual_mean[y-1]-1"
+    },
+    "consumption_gdp": {
+      "numerator": "PCE",
+      "denominator": "GDP",
+      "price_basis": "both current dollars"
+    },
+    "investment_gdp": {
+      "numerator": "PNFI",
+      "denominator": "GDP",
+      "scope": "private nonresidential productive fixed investment",
+      "excluded": [
+        "residential capital",
+        "government fixed investment",
+        "inventory investment"
+      ]
+    },
+    "units": "fractions; report errors as percentage points",
+    "reference_base_year": 2022,
+    "retrospective_reference_years": [
+      2023,
+      2024,
+      2025
+    ],
+    "fit_years": [],
+    "holdout_years": [],
+    "forecast_origin_vintage_available": false,
+    "series_sha256": {
+      "PCEPI": "d51987998b193b1da036f41f0045b50325662a66019c0338d6f2e19220cdd173",
+      "FPI": "cc6035d162333d3a6c501c58f47642fb642b743ad95a1308e7741993010f59a9",
+      "PNFI": "826ede8ed620b16c98f133b0c1b6a331aaf5c7cba22e65f891b0600608a2059f",
+      "GDP": "bd0315f92444903ef49f659f5028fc29b3f6e8cb6ae9baef9db96fd2731c3cb0",
+      "GDPC1": "d4d988941b4065c7c88a8188973cb1b667cf44756ad7402ef7ff03ef28aaf223",
+      "PCE": "e953f68aa136b20636af5e98ac863b123bd46b7fbb5186e092bbbb8db4b2a8d4",
+      "GCE": "49d99f0f7e24ebd927cb1f7350020fc0acbe48e93b78db11363b02c109aadece",
+      "NETEXP": "10522ebe47d9c45ff62db27ec159f4e09000e2f38b76925e36afea18d002ab46",
+      "GPDI": "7ec4f914c92ce317473d6fce72dbaebced42cd0360977484b7c200e1ce6c8ab0"
+    },
+    "manifest_sha256": "ef5bc9d004cb9a04e995f67f5f0e86787457b5f614a04934500bf9aab2ab7b5d"
+  },
+  "non_comparability_frozen": {
+    "GDP": "model produced output with unsold goods is not certified as BEA expenditure GDP",
+    "inflation": "one-good transaction price is not a validated PCE consumption basket",
+    "capital": "nonresidential reference scope does not certify the model wealth-financing mapping",
+    "CEX_PSID_SCF": "micro acceptance and asset-to-bank mapping excluded from this macro stability contract"
+  },
+  "foundation_policy": {
+    "primary": "unchanged upstream defaults; alpha=.36, delta=.06, initial_KY=null (wealth-minus-debt initialization)",
+    "secondary_private_nonresidential": {
+      "alpha": 0.36,
+      "depreciation_rate": 0.08392250548581576,
+      "initial_capital_output_ratio": 1.2924260047334994
+    },
+    "secondary_status": "unchanged opened-development proxy, not measured physical depreciation or approved prior",
+    "capital_stock_timing": "2022 year-end is a reference opening stock for 2023, not opening stock for 2022",
+    "secondary_delta_definition": "2022 nominal depreciation / 2022 current-cost year-end net capital; proxy only",
+    "GDP_initialization": "retain upstream 2022 reference 25474.6 billion USD; do not replace with revised GDP",
+    "alpha": ".36 remains a structural reference, not an estimate from labor-share data",
+    "policy_path": "unchanged real_society tax/rate rules, not a replay of realized 2023-2025 policies"
+  },
+  "optimization": {
+    "fixed_reference_not_estimated": {
+      "capital_adjustment_speed": 0.2,
+      "inflation_expectation_lambda": 0.5
+    },
+    "only_free_parameter": "price_adjustment_speed",
+    "domain": [
+      0.15,
+      0.25
+    ],
+    "basis": "previous local screen at N256, horizon8, no extension to untested domains"
+  },
+  "simulation_calendar": "synthetic t1..t8, t1 excluded from scoring; no assignment to real forecast years",
+  "real_calibration_ready": false,
+  "mechanism_changes_authorized": false,
+  "prior_protocol_sha256": "a315dce31fde59c9267e2134d62ab590fa5fd6c608d7b48a1eca4f177dfcce16"
+}

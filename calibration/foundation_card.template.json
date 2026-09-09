@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "status": "development_candidate",
+  "parameters": {
+    "alpha": null,
+    "depreciation_rate": null,
+    "initial_capital_output_ratio": null
+  },
+  "provenance": {
+    "alpha": {"source": "", "definition": "", "unit": "fraction", "year": 2022},
+    "depreciation_rate": {"source": "", "definition": "", "unit": "fraction_per_model_year", "year": 2022},
+    "initial_capital_output_ratio": {"source": "", "definition": "", "unit": "years", "year": 2022}
+  }
+}

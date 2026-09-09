@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "status": "development_recommendation_not_automatic_configuration",
+  "basis": "runs/foundation_noise_v1/protocol.json and summary.json",
+  "scope": "tested local neighborhoods, N256, 8 periods, 6 development seeds",
+  "automatically_apply": false,
+  "joint_three_parameter_identification": "not_established",
+  "fixed_references_not_estimated": {
+    "capital_adjustment_speed": 0.2,
+    "inflation_expectation_lambda": 0.5
+  },
+  "price_candidate_free_profiles": [
+    "upstream_default", "private_nonresidential", "all_fixed_assets",
+    "private_alpha32", "private_delta09"
+  ],
+  "no_free_parameter_supported_profiles": [
+    "private_total", "private_alpha40", "private_delta04"
+  ],
+  "price_fixed_reference_if_not_identified": 0.2,
+  "real_data_foundation_mapping_approved": false,
+  "warning": "all_fixed_assets includes a sector mismatch; passing a local sensitivity screen does not approve the foundation or prove real-world identification"
+}

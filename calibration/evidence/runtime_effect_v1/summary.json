@@ -1,0 +1,373 @@
+{
+  "protocol_sha256": "47d829013228acff5ca329216064552fa729c50ba6e6f5659dec3721a84a3c23",
+  "evidence_level": "opened_development_software_and_synthetic_recovery",
+  "small_smoke": {
+    "valid": true,
+    "same_seed_exact": true
+  },
+  "long_smoke": {
+    "valid": true,
+    "paths": [
+      {
+        "seed": 908811,
+        "valid": true,
+        "periods": 27,
+        "exception": null,
+        "last": {
+          "period": 27,
+          "inflation": 0.03867182028459637,
+          "real_gdp_growth": 0.0036566672550153445,
+          "consumption_gdp": 0.45796324444636377,
+          "investment_gdp": 0.3710367555536364,
+          "real_gdp": 204408551.151558,
+          "nominal_gdp": 567065375.3903708,
+          "transaction_price": 2.7741763844797385,
+          "unused_real_output": 0.0,
+          "bank_balance_sheet_residual": 2.384185791015625e-07,
+          "bank_balance_sheet_scale": 5076115866.140631,
+          "bank_check": true,
+          "capital_residual": 1.1920928955078125e-07,
+          "firm_cash_residual": 5.960464477539063e-08,
+          "firm_loan_residual": 1.4901161193847656e-07,
+          "expected_inflation_used": 0.03841633958773617,
+          "expected_inflation_next": 0.03854407993616627,
+          "target_at_capacity": true,
+          "goods_constraint_binding": true,
+          "real_lending_rate": -0.02078775031246749,
+          "termination_reason": null,
+          "accounting_failure": null
+        }
+      },
+      {
+        "seed": 908812,
+        "valid": true,
+        "periods": 27,
+        "exception": null,
+        "last": {
+          "period": 27,
+          "inflation": 0.039263875345622035,
+          "real_gdp_growth": 0.0035248276773776066,
+          "consumption_gdp": 0.45724616490256137,
+          "investment_gdp": 0.3717538350974386,
+          "real_gdp": 203056321.9105556,
+          "nominal_gdp": 575104051.7696127,
+          "transaction_price": 2.8322390869610086,
+          "unused_real_output": 0.0,
+          "bank_balance_sheet_residual": 6.258487701416016e-07,
+          "bank_balance_sheet_scale": 5108794522.989274,
+          "bank_check": true,
+          "capital_residual": 0.0,
+          "firm_cash_residual": 1.1920928955078125e-07,
+          "firm_loan_residual": 5.960464477539063e-08,
+          "expected_inflation_used": 0.03905787680029836,
+          "expected_inflation_next": 0.0391608760729602,
+          "target_at_capacity": true,
+          "goods_constraint_binding": true,
+          "real_lending_rate": -0.02139233751708558,
+          "termination_reason": null,
+          "accounting_failure": null
+        }
+      }
+    ],
+    "not_formal_30_seed_stability": true
+  },
+  "foundation_smoke": {
+    "valid": true,
+    "not_empirical_candidate": true,
+    "exceptions": [
+      null
+    ]
+  },
+  "synthetic_recovery": {
+    "uncalibrated": {
+      "valid": true,
+      "normalized_rmse": 1.285662207190274,
+      "mean_path_mae": {
+        "inflation": 0.021648513918374662,
+        "real_gdp_growth": 0.0033513233981669424,
+        "consumption_gdp": 0.0024678974554771895,
+        "investment_gdp": 0.002467897455477319
+      },
+      "per_seed_mae": {
+        "908841": {
+          "inflation": 0.016426096114013983,
+          "real_gdp_growth": 0.00028520489545331214,
+          "consumption_gdp": 0.002098351754230935,
+          "investment_gdp": 0.0020983517542307504
+        },
+        "908842": {
+          "inflation": 0.021207196240661006,
+          "real_gdp_growth": 0.0030120545146113333,
+          "consumption_gdp": 0.004950642656922429,
+          "investment_gdp": 0.0049506426569226325
+        },
+        "908843": {
+          "inflation": 0.03315196452844036,
+          "real_gdp_growth": 0.007327120575342807,
+          "consumption_gdp": 0.004551401463739964,
+          "investment_gdp": 0.004551401463740075
+        }
+      }
+    },
+    "methods": {
+      "blockwise": {
+        "status": "validation_failed",
+        "selected": {
+          "capital_adjustment_speed": 0.2,
+          "price_adjustment_speed": 0.4,
+          "inflation_expectation_lambda": 0.7
+        },
+        "search_configurations": 8,
+        "search_loss": 0.3356696080594728,
+        "diagnostic_reasons": [
+          "capital_adjustment_speed:target_not_bracketed"
+        ],
+        "validation": {
+          "valid": true,
+          "normalized_rmse": 0.6124240475976704,
+          "mean_path_mae": {
+            "inflation": 0.007568708268893973,
+            "real_gdp_growth": 0.003632070107500329,
+            "consumption_gdp": 0.008861773446593002,
+            "investment_gdp": 0.008861773446593021
+          },
+          "per_seed_mae": {
+            "908841": {
+              "inflation": 0.02338412693031369,
+              "real_gdp_growth": 0.00017086514112397822,
+              "consumption_gdp": 0.005975717626519124,
+              "investment_gdp": 0.005975717626519199
+            },
+            "908842": {
+              "inflation": 0.009865173598923471,
+              "real_gdp_growth": 0.0033220018827057915,
+              "consumption_gdp": 0.011953952585645725,
+              "investment_gdp": 0.011953952585645744
+            },
+            "908843": {
+              "inflation": 0.01790246241359091,
+              "real_gdp_growth": 0.0075333010525814445,
+              "consumption_gdp": 0.008655650127614045,
+              "investment_gdp": 0.00865565012761412
+            }
+          }
+        }
+      },
+      "random": {
+        "status": "validation_failed",
+        "selected": {
+          "capital_adjustment_speed": 0.3704106664955751,
+          "price_adjustment_speed": 0.34737590248735517,
+          "inflation_expectation_lambda": 0.7094794035994109
+        },
+        "search_configurations": 12,
+        "search_loss": 0.11596032816777564,
+        "diagnostic_reasons": [],
+        "validation": {
+          "valid": true,
+          "normalized_rmse": 0.704668023517627,
+          "mean_path_mae": {
+            "inflation": 0.012760079093347925,
+            "real_gdp_growth": 0.0035758673762267767,
+            "consumption_gdp": 0.0076261236622658934,
+            "investment_gdp": 0.007626123662265949
+          },
+          "per_seed_mae": {
+            "908841": {
+              "inflation": 0.01968031683959902,
+              "real_gdp_growth": 0.00018547617843155272,
+              "consumption_gdp": 0.005117638275101551,
+              "investment_gdp": 0.005117638275101588
+            },
+            "908842": {
+              "inflation": 0.012521491710869434,
+              "real_gdp_growth": 0.0032418933497346566,
+              "consumption_gdp": 0.01016221241486781,
+              "investment_gdp": 0.010162212414867885
+            },
+            "908843": {
+              "inflation": 0.019746480947078846,
+              "real_gdp_growth": 0.007479866777058857,
+              "consumption_gdp": 0.007598520296828208,
+              "investment_gdp": 0.0075985202968283
+            }
+          }
+        }
+      }
+    },
+    "known_parameter_noise_reference": {
+      "valid": true,
+      "normalized_rmse": 0.6801929127302371,
+      "mean_path_mae": {
+        "inflation": 0.011611807922181168,
+        "real_gdp_growth": 0.003472753759566929,
+        "consumption_gdp": 0.005214917663745451,
+        "investment_gdp": 0.005214917663745581
+      },
+      "per_seed_mae": {
+        "908841": {
+          "inflation": 0.0010028108780075022,
+          "real_gdp_growth": 0.00018205040485244322,
+          "consumption_gdp": 0.000492838394939262,
+          "investment_gdp": 0.0004928383949393914
+        },
+        "908842": {
+          "inflation": 0.014915500152710074,
+          "real_gdp_growth": 0.00316902727713554,
+          "consumption_gdp": 0.008519009916241993,
+          "investment_gdp": 0.00851900991624214
+        },
+        "908843": {
+          "inflation": 0.024030809740550437,
+          "real_gdp_growth": 0.007431284406417691,
+          "consumption_gdp": 0.006632904680055174,
+          "investment_gdp": 0.006632904680055248
+        }
+      }
+    },
+    "note": "Known-parameter response is a Monte Carlo noise reference, not a guaranteed loss lower bound."
+  },
+  "parameter_response": {
+    "capital_adjustment_speed": {
+      "valid": true,
+      "max_absolute_moment_change": 0.00547503382580487,
+      "mean_path_deltas": {
+        "inflation:t2": 0.0,
+        "inflation:t3": -0.00547503382580487,
+        "inflation:t4": 0.00011538281642672205,
+        "real_gdp_growth:t1": 0.0,
+        "real_gdp_growth:t2": 0.0,
+        "real_gdp_growth:t3": 0.0,
+        "real_gdp_growth:t4": -5.316931352624364e-05,
+        "consumption_gdp:t1": 0.0,
+        "consumption_gdp:t2": 0.0,
+        "consumption_gdp:t3": 0.0006761908439596453,
+        "consumption_gdp:t4": 0.0006529196664113446,
+        "investment_gdp:t1": 0.0,
+        "investment_gdp:t2": 0.0,
+        "investment_gdp:t3": -0.0006761908439595898,
+        "investment_gdp:t4": -0.0006529196664113446
+      },
+      "max_expected_inflation_change": 0.008212550738707303,
+      "post_initial_zero_investment_periods": 0
+    },
+    "price_adjustment_speed": {
+      "valid": true,
+      "max_absolute_moment_change": 0.015498370050404851,
+      "mean_path_deltas": {
+        "inflation:t2": 0.015498370050404851,
+        "inflation:t3": 0.014892186159086197,
+        "inflation:t4": 0.014389530681842382,
+        "real_gdp_growth:t1": 0.0,
+        "real_gdp_growth:t2": 0.0,
+        "real_gdp_growth:t3": 0.0001610135911138677,
+        "real_gdp_growth:t4": 0.0002989702104889691,
+        "consumption_gdp:t1": 0.0,
+        "consumption_gdp:t2": -0.0018725541435237192,
+        "consumption_gdp:t3": -0.003577736340039772,
+        "consumption_gdp:t4": -0.005151944450442758,
+        "investment_gdp:t1": 0.0,
+        "investment_gdp:t2": 0.0018725541435236082,
+        "investment_gdp:t3": 0.003577736340039661,
+        "investment_gdp:t4": 0.005151944450442869
+      },
+      "max_expected_inflation_change": 0.017575630271874865,
+      "post_initial_zero_investment_periods": 0
+    },
+    "inflation_expectation_lambda": {
+      "valid": true,
+      "max_absolute_moment_change": 0.0035601998876503664,
+      "mean_path_deltas": {
+        "inflation:t2": 0.0,
+        "inflation:t3": -0.0035601998876503664,
+        "inflation:t4": 7.462818070624877e-05,
+        "real_gdp_growth:t1": 0.0,
+        "real_gdp_growth:t2": 0.0,
+        "real_gdp_growth:t3": 0.0,
+        "real_gdp_growth:t4": -3.4379451712511326e-05,
+        "consumption_gdp:t1": 0.0,
+        "consumption_gdp:t2": 0.0,
+        "consumption_gdp:t3": 0.0004372490993806988,
+        "consumption_gdp:t4": 0.00042302966676155407,
+        "investment_gdp:t1": 0.0,
+        "investment_gdp:t2": 0.0,
+        "investment_gdp:t3": -0.00043724909938064327,
+        "investment_gdp:t4": -0.00042302966676155407
+      },
+      "max_expected_inflation_change": 0.0051938931632689485,
+      "post_initial_zero_investment_periods": 0
+    }
+  },
+  "real_data_descriptive_only": {
+    "real_calibration_run": false,
+    "historical_validity_certified": false,
+    "caveats": {
+      "metrics": [
+        "real_gdp_growth",
+        "consumption_gdp"
+      ],
+      "period_year_candidate": {
+        "2": 2023,
+        "3": 2024,
+        "4": 2025
+      },
+      "policy": "fixed 2022, not actual historical policy; descriptive mismatch only",
+      "never_used_to_optimize": true
+    },
+    "uncalibrated_mean_path": [
+      {
+        "year_candidate": 2023,
+        "period": 2,
+        "real_gdp_growth": {
+          "simulated": 0.003900379705555679,
+          "observed": 0.029343609230527923,
+          "difference": -0.025443229524972244
+        },
+        "consumption_gdp": {
+          "simulated": 0.5438857000228469,
+          "observed": 0.6771711997347478,
+          "difference": -0.13328549971190096
+        }
+      },
+      {
+        "year_candidate": 2024,
+        "period": 3,
+        "real_gdp_growth": {
+          "simulated": 0.004054153167387368,
+          "observed": 0.027931871846460066,
+          "difference": -0.023877718679072697
+        },
+        "consumption_gdp": {
+          "simulated": 0.5400148111196535,
+          "observed": 0.6790907118208328,
+          "difference": -0.13907590070117926
+        }
+      },
+      {
+        "year_candidate": 2025,
+        "period": 4,
+        "real_gdp_growth": {
+          "simulated": 0.00419112452843821,
+          "observed": 0.021063376260688882,
+          "difference": -0.01687225173225067
+        },
+        "consumption_gdp": {
+          "simulated": 0.5362397850837458,
+          "observed": 0.6811907894721693,
+          "difference": -0.14495100438842345
+        }
+      }
+    ]
+  },
+  "totals": {
+    "calls": 32,
+    "requested_paths": 69,
+    "returned_paths": 69,
+    "valid_paths": 69
+  },
+  "tracked_sources_unchanged": true,
+  "real_calibration_ready": false,
+  "taskbook_acceptance": "NOT_EVALUATED",
+  "upstream_modified": false,
+  "no_post_validation_tuning": true
+}
