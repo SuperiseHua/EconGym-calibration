@@ -1,5 +1,13 @@
 # 🌐 EconGym: A Scalable AI Testbed with Diverse Economic Tasks
 
+> **Calibration integration / 自动校准协作版**
+>
+> This repository preserves the upstream AgentEWM model and adds an isolated calibration extension.
+> Start with **[Calibration quick start / 自动校准完整运行流程](calibration/README.md#quick-start)**
+> for setup, tests, a complete synthetic-calibration run, output interpretation and troubleshooting.
+> 当前最小流程无需额外数据包；程序跑通不等于校准验收通过，真实数据校准尚未完成。
+> 除本导航说明及 `calibration/` 扩展外，上游经济机制保持不变。下文保留原项目介绍与通用平台说明。
+
 
 ![EconGym Overview](document/img/EconGym%20V2.jpg "EconGym Structure Overview")
 

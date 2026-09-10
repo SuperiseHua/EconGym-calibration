@@ -12,7 +12,7 @@ This is a curated additive integration snapshot, not a replacement for the full 
 - The byte-preserved price-stability contract, for interpretation of the latest result.
 - A new publication README and data-independent static-test entry point.
 
-`PUBLICATION_MANIFEST.json` lists the source-relative path and SHA-256 of every copied file.
+`PUBLICATION_MANIFEST.json` records the initial snapshot (`33334ec`) and lists the source-relative path and SHA-256 of every copied file.
 Source Python files are copied without algorithm changes. New publication-only files are listed separately.
 Local originals and frozen experimental directories are neither edited nor removed.
 The calibration-specific `.gitattributes` disables line-ending conversion for this snapshot so copied artifact hashes remain meaningful.
@@ -50,5 +50,15 @@ The calibration-specific `.gitattributes` disables line-ending conversion for th
 - No support for every economic mechanism, agent policy or interface in AgentEWM.
 - No complete taskbook acceptance, fresh-environment simulator replication, or regression clearance for all upstream tests.
 
-本次发布仅重跑无模拟器的静态测试。此前整合环境的上游 23 项测试中有两项因货币政策模板文件缺失报错；
+初始发布步骤仅重跑无模拟器的静态测试。此前整合环境的上游 23 项测试中有两项因货币政策模板文件缺失报错；
 没有通过伪造模板消除错误，也没有在此发布步骤修改协作者源码。
+
+## Subsequent documentation and delivery check / 后续文档与交付检查
+
+2026-09-10，按用户要求补充 `calibration/README.md` 完整运行教程，并在根 `README.md`
+加入校准入口；本范围说明同步更新。没有更改模拟器、校准算法、参数或验收阈值。
+初始发布清单保留为初始快照记录，不冒充后续整个仓库的完整文件索引。
+
+文档补充前，在初始提交的干净本地克隆完成 64 家庭 / 3 期合成校准依赖检查：
+没有额外数据包，4 条路径有效，投资与部门核算通过，但校准 `validation_failed`。
+使用本机已有环境，不是另一台电脑从零安装的独立复现，也未重跑价格稳定性研究实验。
